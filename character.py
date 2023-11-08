@@ -34,7 +34,7 @@ class Idle:
 
     @staticmethod
     def enter(c, e):
-        c.frameX, c.frameY = 0, 0
+        c.frameX, c.frameY = 0, 3
         pass
 
     @staticmethod
@@ -47,7 +47,7 @@ class Idle:
 
     @staticmethod
     def draw(c):
-        c.image.clip_draw(c.frame * 100, c.action * 100, 100, 100, c.x, c.y)
+        c.image.clip_draw(c.frameX * 32, c.frameY * 32, 32, 32, c.x, c.y, 64, 64)
 
 
 
