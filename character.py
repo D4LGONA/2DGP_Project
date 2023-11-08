@@ -127,7 +127,7 @@ class StateMachine:
         self.cur_state = Idle
         self.transitions = {
             Idle: {Lclick: Run, space_down: Jump, ctrl_down: Stop},
-            Run: {},
+            Run: {Lclick: Run},
             Stop: {ctrl_up: Idle}
         }
 
@@ -158,7 +158,7 @@ class Character: # 강아지 캐릭터
 
 
     def __init__(self):
-        self.x, self.y = 200, 200 # 화면 정 중앙에 그리기
+        self.x, self.y = 300, 300 # 화면 정 중앙에 그리기
         self.frameX, self.frameY = 0, 0
         self.image = load_image('resources/TestDog2.png')
         self.state_machine = StateMachine(self)
