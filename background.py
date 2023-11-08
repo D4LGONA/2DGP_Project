@@ -22,6 +22,7 @@ class Background:
         self.dirY = -1 * (y-300) / dist((x, y), (300, 300))
 
     def update(self):
+        print("업데이트 도는 중") # d얘를 안돌게 하는 방법 ??
         self.x += self.dirX * self.speed
         self.CX -= self.dirX * self.speed
         self.y += self.dirY * self.speed

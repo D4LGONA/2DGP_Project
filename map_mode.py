@@ -2,7 +2,6 @@ import pico2d
 import game_framework
 import game_world
 import play_mode
-import background
 from pannel import Pannel
 
 
@@ -18,7 +17,7 @@ def finish():
     pass
 
 def update():
-    game_world.update()
+    #game_world.update()
     pannel.centerPT(play_mode.centerX, play_mode.centerY)
     pass
 
