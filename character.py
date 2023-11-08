@@ -34,26 +34,16 @@ class Idle:
 
     @staticmethod
     def enter(c, e):
-        if c.dir.x == -1:
-            c.action = 2
-        elif c.face_dir == 1:
-            c.action = 3
-        c.dir = 0
-        c.frame = 0
-        c.wait_time = get_time() # pico2d import 필요
+        c.frameX, c.frameY = 0, 0
         pass
 
     @staticmethod
     def exit(c, e):
-        if space_down(e):
-            c.fire_ball()
         pass
 
     @staticmethod
     def do(c):
-        c.frame = (c.frame + 1) % 8
-        if get_time() - c.wait_time > 2:
-            c.state_machine.handle_event(('TIME_OUT', 0))
+        pass
 
     @staticmethod
     def draw(c):
@@ -119,11 +109,12 @@ class Stop:
 
     @staticmethod
     def do(c):
-        c.frame = (c.frame + 1) % 8
+        c.frameX = (c.frameX + 1) % 2
 
     @staticmethod
     def draw(c):
-        if c.face_dir == -1:
+        if c.face_dir == 1:
+            c.frameY = 1
             pass
         else:
             pass
@@ -163,7 +154,9 @@ class StateMachine:
 
 
 
-class character:
+class Character: # 강아지 캐릭터
+
+
     def __init__(self):
         self.x, self.y = 200, 200 # 화면 정 중앙에 그리기
         self.frameX, self.frameY = 0, 0
