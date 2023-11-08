@@ -21,6 +21,7 @@ def handle_events():
             game_framework.quit()
         elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
             bg.setDest(event.x, 600 - 1 - event.y)
+            dog.handle_event(event)
         elif event.type == SDL_KEYDOWN and event.key == SDLK_m:
             game_framework.push_mode(map_mode)
         else:

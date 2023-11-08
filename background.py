@@ -16,13 +16,12 @@ class Background:
     def draw(self):
         self.image.draw(self.x, self.y, bgWidth, bgHeight)
 
-    def setDest(self, x, y):
+    def setDest(self, x, y): # 목적지와 방향 정하는 것
         # x, y가 300, 300에서 얼마나 떨어져 있는지 확인 하기 x - 300, y - 300 얘를 정규화 x,y랑 300300
         self.dirX = -1 * (x-300) / dist((x,y), (300, 300))
         self.dirY = -1 * (y-300) / dist((x, y), (300, 300))
 
     def update(self):
-        print("업데이트 도는 중") # d얘를 안돌게 하는 방법 ??
         self.x += self.dirX * self.speed
         self.CX -= self.dirX * self.speed
         self.y += self.dirY * self.speed
