@@ -47,7 +47,7 @@ class Idle:
 
     @staticmethod
     def draw(c):
-        c.image.clip_draw(c.frameX * 32, c.frameY * 32, 32, 32, c.x, c.y, 64, 64)
+        c.image.clip_draw(c.frameX * 32, c.frameY * 32, 32, 32, c.drawX, c.drawY, 64, 64)
 
 
 
@@ -68,7 +68,7 @@ class Run:
 
     @staticmethod
     def draw(c):
-        c.image.clip_draw(c.frameX * 32, c.frameY * 32, 32, 32, c.x, c.y) # 이미지 크기는 32*32
+        c.image.clip_draw(c.frameX * 32, c.frameY * 32, 32, 32, c.drawX, c.drawY) # 이미지 크기는 32*32
 
 class Jump:
 
@@ -158,7 +158,8 @@ class Character: # 강아지 캐릭터
 
 
     def __init__(self):
-        self.x, self.y = 300, 300 # 화면 정 중앙에 그리기
+        self.drawX, self.drawY= 300, 300 # 화면 정 중앙에 그리기
+        #self.x, self.y = 300, 300
         self.frameX, self.frameY = 0, 0
         self.image = load_image('resources/TestDog2.png')
         self.state_machine = StateMachine(self)

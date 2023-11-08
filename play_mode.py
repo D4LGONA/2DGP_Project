@@ -3,8 +3,14 @@ import random
 from pico2d import *
 import game_framework
 import game_world
+import pannel
 from background import Background
 from character import Character
+import map_mode
+
+
+centerX = 300
+centerY = 300
 
 def handle_events():
     events = get_events()
@@ -12,10 +18,11 @@ def handle_events():
         if event.type == SDL_QUIT:
             game_framework.quit()
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
-            print("얘는 되나")
             game_framework.quit()
         elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
             bg.setDest(event.x, 600 - 1 - event.y)
+        elif event.type == SDL_KEYDOWN and event.key == SDLK_m:
+            game_framework.push_mode(map_mode)
         else:
             dog.handle_event(event)
 
@@ -28,8 +35,6 @@ def init():
 
     game_world.add_object(bg, 0)
     game_world.add_object(dog, 1)
-
-
     pass
 
 def finish():
@@ -38,9 +43,13 @@ def finish():
 
 
 def update():
+    global centerX, centerY
     game_world.update()
+    centerX = bg.CX
+    centerY = bg.CY
+    print(centerX, centerY)
     # fill here
-    game_world.handle_collisions()
+    #game_world.handle_collisions()
 
 def draw():
     clear_canvas()

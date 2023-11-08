@@ -1,8 +1,8 @@
 from pico2d import load_image
 from math import *
 
-bgWidth = 3200
-bgHeight = 3200
+bgWidth = 3600
+bgHeight = 3600
 
 class Background:
     def __init__(self, x = bgWidth // 2, y = bgHeight // 2):
@@ -11,6 +11,7 @@ class Background:
         self.count = 0
         self.speed = 1
         self.dirX, self.dirY = 0.0, 0.0
+        self.CX, self.CY = 300, 300
 
     def draw(self):
         self.image.draw(self.x, self.y, bgWidth, bgHeight)
@@ -22,7 +23,11 @@ class Background:
 
     def update(self):
         self.x += self.dirX * self.speed
+        self.CX -= self.dirX * self.speed
         self.y += self.dirY * self.speed
+        self.CY -= self.dirY * self.speed
         self.x = min(max(self.x, -(bgWidth//2) + 600), bgWidth//2)
+        self.CX = min(max(self.CX, 300), 3300)
         self.y = min(max(self.y, -(bgHeight//2) + 600), bgHeight//2)
+        self.CY = min(max(self.CY, 300), 3300)
         pass
