@@ -3,8 +3,17 @@ objects = [[] for _ in range(4)]
 # fill here
 collision_pairs = {} # {'boy:ball' : [[boy], [balls]]}
 
+'''
+** todo list **
+오브젝트 간의 depth 이동
+'''
 
-
+def move_depth(o, depth):
+    for i in objects:
+        if o in i:
+            i.remove(o)
+    objects[depth].append(o)
+    pass
 
 def add_object(o, depth = 0):
     objects[depth].append(o)

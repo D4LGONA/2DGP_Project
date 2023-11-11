@@ -6,6 +6,8 @@ import game_world
  ** Todo list **
  Jump 상태일 때 맵 보기로 넘어가면 제자리로 돌아오지 않는 문제
  -> 상태를 확인하고 map mode에서 update를 돌릴지 말지 설정하는 방법이 없을까?
+ Jump 가속도 수정하기
+ 강아지 리소스 수정하기(멈추는 것과 점프 모션을 다시 정할 것)
  
 
 '''
@@ -112,9 +114,9 @@ class Jump:
     @staticmethod
     def do(c): # todo: frame 증가, 위치 이동
         c.frameX = (c.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 2
-        if get_time() - c.jumptime < 1:
+        if get_time() - c.jumptime < 0.3:
             c.drawY += 1
-        elif get_time() - c.jumptime < 2:
+        elif get_time() - c.jumptime < 0.6:
             # if c.face_dir == ""
             c.drawY -= 1
         else:

@@ -7,6 +7,7 @@ import pannel
 from background import Background
 from dog import Dog
 import map_mode
+from huddle import Huddle
 
 
 centerX = 300
@@ -29,18 +30,22 @@ def handle_events():
         elif event.type == SDL_MOUSEBUTTONDOWN:
             if event.button == SDL_BUTTON_LEFT:
                 bg.setDest(event.x, 600 - 1 - event.y)
+                huddle.setDest(event.x, 600 - 1 - event.y)
                 dog.setface_dir(event.x, 600 - 1 - event.y)
                 dog.handle_event(event)
 
 def init():
     global dog
     global bg
+    global huddle
 
     dog = Dog()
     bg = Background()
+    huddle = Huddle(400, 400)
 
     game_world.add_object(bg, 0)
-    game_world.add_object(dog, 1)
+    game_world.add_object(dog, 2)
+    game_world.add_object(huddle, 1)
     pass
 
 def finish():
