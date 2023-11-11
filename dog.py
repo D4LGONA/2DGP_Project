@@ -56,8 +56,8 @@ class Idle:
 
     @staticmethod
     def enter(c, e):
-        c.frameX, c.frameY = 0, 3
-        pass
+        print("idle enter")
+        c.face_dir = 'idle'
 
     @staticmethod
     def exit(c, e):
@@ -66,11 +66,13 @@ class Idle:
     @staticmethod
     def do(c):
         # print("idle 실행 중")
+        c.frameX = (c.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 2
         pass
 
     @staticmethod
     def draw(c):
-        c.image.clip_draw(c.frameX * 32, c.frameY * 32, 32, 32, c.drawX, c.drawY, 64, 64)
+        c.frameY = state[c.face_dir]
+        c.image.clip_draw(int(c.frameX) * 32, c.frameY * 32, 32, 32, c.drawX, c.drawY, 64, 64)
 
 
 class Run:
@@ -100,13 +102,13 @@ class Jump:
     @staticmethod
     def enter(c, e):
         c.frameX = 0
-        c.frameY = 1
         c.jumptime = get_time()
+        c.isjump = True
         pass
 
     @staticmethod
     def exit(c, e):
-
+        c.isjump = False
         pass
 
     @staticmethod
@@ -132,7 +134,7 @@ class Stop:
 
     @staticmethod
     def enter(c, e):
-        c.frame = 0
+        c.frameX = 0
         pass
 
     @staticmethod
@@ -141,41 +143,44 @@ class Stop:
 
     @staticmethod
     def do(c):
-        c.frameX = (c.frameX + 1) % 2
+        #c.frameX = (c.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 2
+        pass
 
     @staticmethod
     def draw(c):
+        c.frameY = state[c.face_dir]
+        c.image.clip_draw(int(c.frameX) * 32, c.frameY * 32, 32, 32, c.drawX, c.drawY, 64, 64)
         pass
 
 class StateMachine:
-    def __init__(self, boy):
-        self.boy = boy
+    def __init__(self, dog):
+        self.dog = dog
         self.cur_state = Idle
         self.transitions = {
-            Idle: {Lclick: Run, space_down: Jump, ctrl_down: Stop},
+            Idle: {Lclick: Run, space_down: Jump},
             Run: {Lclick: Run, ctrl_down: Stop, space_down: Jump},
             Stop: {ctrl_up: Idle},
             Jump: {time_out: Run}
         }
 
     def start(self):
-        self.cur_state.enter(self.boy, ('NONE', 0))
+        self.cur_state.enter(self.dog, ('NONE', 0))
 
     def update(self):
-        self.cur_state.do(self.boy)
+        self.cur_state.do(self.dog)
 
     def handle_event(self, e):
         for check_event, next_state in self.transitions[self.cur_state].items():
             if check_event(e):
-                self.cur_state.exit(self.boy, e)
+                self.cur_state.exit(self.dog, e)
                 self.cur_state = next_state
-                self.cur_state.enter(self.boy, e)
+                self.cur_state.enter(self.dog, e)
                 return True
 
         return False
 
     def draw(self):
-        self.cur_state.draw(self.boy)
+        self.cur_state.draw(self.dog)
 
 
 class Dog: # 강아지 캐릭터
@@ -186,7 +191,8 @@ class Dog: # 강아지 캐릭터
         self.image = load_image('resources/dog1.png')
         self.state_machine = StateMachine(self)
         self.state_machine.start()
-        self.face_dir = 'run_up'
+        self.face_dir = 'idle'
+        self.isjump = False
 
     def update(self):
         self.state_machine.update()

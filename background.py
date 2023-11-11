@@ -21,6 +21,9 @@ class Background:
         self.dirX = -1 * (x-300) / dist((x,y), (300, 300))
         self.dirY = -1 * (y-300) / dist((x, y), (300, 300))
 
+    def setStop(self):
+        self.dirX, self.dirY = 0, 0
+
     def update(self):
         self.x += self.dirX * self.speed
         self.CX -= self.dirX * self.speed
