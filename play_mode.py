@@ -5,7 +5,7 @@ import game_framework
 import game_world
 import pannel
 from background import Background
-from character import Character
+from dog import Dog
 import map_mode
 
 
@@ -21,6 +21,7 @@ def handle_events():
             game_framework.quit()
         elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
             bg.setDest(event.x, 600 - 1 - event.y)
+            dog.setface_dir(event.x, 600 - 1 - event.y)
             dog.handle_event(event)
         elif event.type == SDL_KEYDOWN and event.key == SDLK_m:
             game_framework.push_mode(map_mode)
@@ -31,7 +32,7 @@ def init():
     global dog
     global bg
 
-    dog = Character()
+    dog = Dog()
     bg = Background()
 
     game_world.add_object(bg, 0)
@@ -48,7 +49,7 @@ def update():
     game_world.update()
     centerX = bg.CX
     centerY = bg.CY
-    print(centerX, centerY)
+    # print(centerX, centerY)
     # fill here
     #game_world.handle_collisions()
 
