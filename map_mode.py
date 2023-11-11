@@ -16,7 +16,7 @@ def finish():
     game_world.remove_object(pannel)
     pass
 
-def update():
+def update(): # Todo: 여기 어떻게 해결할 지 고민해야 함
     #game_world.update()
     pannel.centerPT(play_mode.centerX, play_mode.centerY)
     pass

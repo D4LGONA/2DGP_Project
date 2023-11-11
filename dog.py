@@ -1,16 +1,14 @@
-# 이것은 각 상태들을 객체로 구현한 것임.
-
 from pico2d import *
 import game_framework
 import game_world
-from ball import Ball
 
-# Todo: 속도 정해 줘야 함
-# Todo: 클래스 이름 바꾸기
-# 코드 이해할 수 있게 바꾸기
-# 프레임 시간부터 하기
-# Todo: 강아지가 이동하게 하려면 어떻게 해야 하는 거지?
-# 함수 하나가 한 페이지를 넘어가지 않도록 해라 **
+'''
+ ** Todo list **
+ Jump 상태일 때 맵 보기로 넘어가면 제자리로 돌아오지 않는 문제
+ -> 상태를 확인하고 map mode에서 update를 돌릴지 말지 설정하는 방법이 없을까?
+ 
+
+'''
 
 state = {"stop_left": 0, "stop_right": 1, "stop_up" : 2, "stop_down": 3,
          "run_ld": 4, "run_ru": 5, "run_l": 6, "run_r": 7,
@@ -18,7 +16,7 @@ state = {"stop_left": 0, "stop_right": 1, "stop_up" : 2, "stop_down": 3,
 
 # 강아지 속도 10km/h로 갈기고 여기서 36003600이니까 720미터 정도로 할까 가로 세로
 PIXEL_PER_METER = (3600 / 72)  # 10 pixel 30 cm
-RUN_SPEED_KMPH = 10.0  # Km / Hour
+RUN_SPEED_KMPH = 20.0  # Km / Hour
 RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
 RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
 RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
@@ -202,6 +200,7 @@ class Dog: # 강아지 캐릭터
 
     def draw(self):
         self.state_machine.draw()
+        draw_rectangle(*self.getbb())
 
     def setface_dir(self, x, y):
         x1, y1 = 300, 300
@@ -211,7 +210,6 @@ class Dog: # 강아지 캐릭터
 
         angle_radians = math.atan2((slope2 - slope1) ,(1 + slope1 * slope2))
         angle_degrees = math.degrees(angle_radians)
-        # angle_radians = math.acos()
         angle_degrees = (angle_degrees + 360) % 360
         if x < 300:
             angle_degrees = (angle_degrees + 180) % 360
@@ -233,3 +231,6 @@ class Dog: # 강아지 캐릭터
             self.face_dir = "run_rd"
         else:
             self.face_dir = "run_r"
+
+    def getbb(self):
+        return self.drawX - 32, self.drawY - 32, self.drawX + 32, self.drawY + 32

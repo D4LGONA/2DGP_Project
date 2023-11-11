@@ -12,7 +12,6 @@ def add_object(o, depth = 0):
 def add_objects(ol, depth = 0):
     objects[depth] += ol
 
-
 def update():
     for layer in objects:
         for o in layer:

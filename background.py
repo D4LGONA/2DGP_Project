@@ -1,5 +1,7 @@
 from pico2d import load_image
 from math import *
+import dog
+import game_framework
 
 bgWidth = 3600
 bgHeight = 3600
@@ -25,10 +27,10 @@ class Background:
         self.dirX, self.dirY = 0, 0
 
     def update(self):
-        self.x += self.dirX * self.speed
-        self.CX -= self.dirX * self.speed
-        self.y += self.dirY * self.speed
-        self.CY -= self.dirY * self.speed
+        self.x += self.dirX * dog.RUN_SPEED_PPS * game_framework.frame_time
+        self.CX -= self.dirX * dog.RUN_SPEED_PPS * game_framework.frame_time
+        self.y += self.dirY * dog.RUN_SPEED_PPS * game_framework.frame_time
+        self.CY -= self.dirY * dog.RUN_SPEED_PPS * game_framework.frame_time
         self.x = min(max(self.x, -(bgWidth//2) + 600), bgWidth//2)
         self.CX = min(max(self.CX, 300), 3300)
         self.y = min(max(self.y, -(bgHeight//2) + 600), bgHeight//2)
