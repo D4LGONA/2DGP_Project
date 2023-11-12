@@ -14,10 +14,17 @@ centerY = 300
 success_count = 0
 fail_count = 0
 timer = 0.0
-font = load_font('ENCR10B.TTF', 16)
+start_time = 0.0
+timerStart = False
+huddle_count = 0
+
+'''
+Todo: 넘은 허들 어떻게 카운트 할 것인가
+'''
+
 
 def handle_events():
-    global timer
+    global timerStart, timer, start_time
     events = get_events()
     for event in events:
         dog.handle_event(event)
@@ -35,9 +42,14 @@ def handle_events():
                     bg.setStop()
         elif event.type == SDL_MOUSEBUTTONDOWN:
             if event.button == SDL_BUTTON_LEFT:
-                timer = get_time()
+                if not timerStart:
+                    timerStart = True
+                    timer = 0.0
+                    start_time = get_time()
                 bg.setDest(event.x, 600 - 1 - event.y)
-                for i in huddle:
+                for i in game_world.objects[1]:
+                    i.setDest(event.x, 600 - 1 - event.y)
+                for i in game_world.objects[3]:
                     i.setDest(event.x, 600 - 1 - event.y)
                 dog.setface_dir(event.x, 600 - 1 - event.y)
                 dog.handle_event(event)
@@ -47,9 +59,12 @@ def init():
     global bg
     global huddle
 
+    global font
+    font = load_font('ENCR10B.TTF', 16)
+
     dog = Dog()
     bg = Background()
-    huddle = [Huddle() for _ in range(1)]
+    huddle = [Huddle(i + 1) for i in range(20)]
 
     game_world.add_object(bg, 0)
     game_world.add_object(dog, 2)
@@ -66,18 +81,22 @@ def finish():
 
 
 def update():
-    global centerX, centerY
+    global centerX, centerY, timer
+    if not timerStart:
+        timer = 0.0
+    else:
+        timer = get_time() - start_time
     game_world.update()
     centerX = bg.CX
     centerY = bg.CY
-    # print(centerX, centerY)
-    # fill here
     game_world.handle_collisions()
 
 def draw():
     clear_canvas()
     game_world.render()
-    font.draw(600 - 10, 600 - 50, f'{timer:0.2f}', (255, 255, 0))
+    font.draw(600 - 200, 600 - 20, f'PLAYTIME: {timer:0.2f}', (0, 0, 0))
+    font.draw(600 - 200, 600 - 40, f'SUCCESS: {success_count}', (0, 0, 0))
+    font.draw(600 - 200, 600 - 60, f'FAIL: {fail_count}', (0, 0, 0))
     update_canvas()
 
 def pause():

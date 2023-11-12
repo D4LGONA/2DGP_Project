@@ -3,6 +3,8 @@ import game_framework
 import game_world
 from math import *
 
+import huddle_mode
+
 '''
  ** Todo list **
  Jump 상태일 때 맵 보기로 넘어가면 제자리로 돌아오지 않는 문제
@@ -250,4 +252,8 @@ class Dog: # 강아지 캐릭터
         return self.drawX - 32, self.drawY - 32, self.drawX + 32, self.drawY + 32
 
     def handle_collision(self, group, other):
-        pass
+        if not self.isjump:
+            other.iscoll = True
+            if not other.ischecked:
+                other.ischecked = True
+                huddle_mode.fail_count += 1

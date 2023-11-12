@@ -19,9 +19,12 @@ FRAMES_PER_ACTION = 4
 
 class Huddle:
     image = None
-    def __init__(self):
+    def __init__(self, num):
         if Huddle.image == None:
             Huddle.image = load_image('resources/huddle.png')
+        self.ismoved = False
+        self.ischecked = False
+        self.number = num
         self.frameX, self.frameY = 0, 3
         self.x, self.y = randint(600, 3000), randint(600, 3000)
         self.CX, self.CY = self.x, self.y
@@ -39,13 +42,16 @@ class Huddle:
 
     def setDest(self, x, y): # 목적지와 방향 정하는 것
         # x, y가 300, 300에서 얼마나 떨어져 있는지 확인 하기 x - 300, y - 300 얘를 정규화 x,y랑 300300
-        self.dirX = -1 * (x-300) / dist((x,y), (300, 300))
+        self.dirX = -1 * (x-300) / dist((x, y), (300, 300))
         self.dirY = -1 * (y-300) / dist((x, y), (300, 300))
 
     def setStop(self):
         self.dirX, self.dirY = 0, 0
 
     def update(self):
+        if self.ismoved:
+            self.ismoved = False
+            return
         self.set_depth()
 
         if self.iscoll and self.frameX < 3:
@@ -59,10 +65,16 @@ class Huddle:
         pass
 
     def set_depth(self):
-        if self.y + 10 > 300:
-            game_world.move_depth(self, 1)
-        elif self.y + 10 < 300:
-            game_world.move_depth(self, 3)
+        if self in game_world.objects[1]:
+            if self.y + 10 < 300:
+                game_world.move_depth(self, 3)
+                self.ismoved = True
+        elif self in game_world.objects[3]:
+            if self.y + 10 > 300:
+                game_world.move_depth(self, 1)
+
+
+
 
     def get_bb(self):
         if self.state == "right2" or self.state == "left2":
@@ -71,6 +83,5 @@ class Huddle:
             return self.x - 32, self.y - 50, self.x + 32, self.y - 10
 
     def handle_collision(self, group, other):
-        if group == 'dog:huddle':
-            if not other.isjump:
-                self.iscoll = True
+        pass
+
