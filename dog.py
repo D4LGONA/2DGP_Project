@@ -252,8 +252,12 @@ class Dog: # 강아지 캐릭터
         return self.drawX - 32, self.drawY - 32, self.drawX + 32, self.drawY + 32
 
     def handle_collision(self, group, other):
-        if not self.isjump:
-            other.iscoll = True
+        if group == 'dog:huddle':
             if not other.ischecked:
                 other.ischecked = True
-                huddle_mode.fail_count += 1
+                huddle_mode.huddle_count -= 1
+                if self.isjump:
+                    huddle_mode.success_count += 1
+                else:
+                    huddle_mode.fail_count += 1
+                    other.iscoll = True

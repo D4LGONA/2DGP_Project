@@ -2,7 +2,7 @@ import random
 from pico2d import *
 import game_framework
 import game_world
-import pannel
+import map
 from background import Background
 from dog import Dog, Idle
 import map_mode
@@ -16,10 +16,10 @@ fail_count = 0
 timer = 0.0
 start_time = 0.0
 timerStart = False
-huddle_count = 0
+huddle_count = 20
 
 '''
-Todo: 넘은 허들 어떻게 카운트 할 것인가
+Todo
 '''
 
 
@@ -97,6 +97,7 @@ def draw():
     font.draw(600 - 200, 600 - 20, f'PLAYTIME: {timer:0.2f}', (0, 0, 0))
     font.draw(600 - 200, 600 - 40, f'SUCCESS: {success_count}', (0, 0, 0))
     font.draw(600 - 200, 600 - 60, f'FAIL: {fail_count}', (0, 0, 0))
+    font.draw(600 - 200, 600 - 80, f'REMAIN: {huddle_count} / 20', (0,0,0))
     update_canvas()
 
 def pause():

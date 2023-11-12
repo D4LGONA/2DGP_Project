@@ -2,23 +2,23 @@ import pico2d
 import game_framework
 import game_world
 import huddle_mode
-from pannel import Pannel
+from map import Map
 
 
 def init():
-    global pannel
-    pannel = Pannel()
-    pannel.centerPT(huddle_mode.centerX, huddle_mode.centerY)
-    game_world.add_object(pannel, 3)
+    global map
+    map = Map()
+    map.centerPT(huddle_mode.centerX, huddle_mode.centerY)
+    game_world.add_object(map, 3)
     pass
 
 def finish():
-    game_world.remove_object(pannel)
+    game_world.remove_object(map)
     pass
 
 def update(): # Todo: 여기 어떻게 해결할 지 고민해야 함
     #game_world.update()
-    pannel.centerPT(huddle_mode.centerX, huddle_mode.centerY)
+    map.centerPT(huddle_mode.centerX, huddle_mode.centerY)
     pass
 
 def draw():

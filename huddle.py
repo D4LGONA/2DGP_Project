@@ -66,11 +66,11 @@ class Huddle:
 
     def set_depth(self):
         if self in game_world.objects[1]:
-            if self.y + 10 < 300:
+            if self.y - 10 < 300:
                 game_world.move_depth(self, 3)
                 self.ismoved = True
         elif self in game_world.objects[3]:
-            if self.y + 10 > 300:
+            if self.y - 10 > 300:
                 game_world.move_depth(self, 1)
 
 
