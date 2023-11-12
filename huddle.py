@@ -3,14 +3,12 @@ from math import *
 import dog
 import game_framework
 from random import *
-import play_mode
+import huddle_mode
 
 import game_world
 
 '''
 ** todo list **
-update 부분 수정할 것(허들 이동 하는 것)
-충돌처리
 '''
 
 state = {"right2": 0, "left2": 1, "right1": 2, "left1": 3}
@@ -21,12 +19,12 @@ FRAMES_PER_ACTION = 4
 
 class Huddle:
     image = None
-    def __init__(self, x = randint(600, 3000), y = randint(600, 3000)):
+    def __init__(self):
         if Huddle.image == None:
             Huddle.image = load_image('resources/huddle.png')
         self.frameX, self.frameY = 0, 3
-        self.x, self.y = x, y
-        self.CX, self.CY = x, y
+        self.x, self.y = randint(600, 3000), randint(600, 3000)
+        self.CX, self.CY = self.x, self.y
         self.dirX, self.dirY = 0.0, 0.0
         self.state_value = randint(0, 3)
         self.state = [i for i, v in state.items() if v == self.state_value][0]
@@ -48,6 +46,8 @@ class Huddle:
         self.dirX, self.dirY = 0, 0
 
     def update(self):
+        self.set_depth()
+
         if self.iscoll and self.frameX < 3:
             self.frameX = (self.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 4
 
@@ -58,15 +58,15 @@ class Huddle:
         self.y = min(max(self.y, self.CY - 3000), self.CY)
         pass
 
-    def set_depth(self, dog):
-        if self.y + 10 > dog.y:
+    def set_depth(self):
+        if self.y + 10 > 300:
             game_world.move_depth(self, 1)
-        elif self.y + 10 < dog.y:
+        elif self.y + 10 < 300:
             game_world.move_depth(self, 3)
 
     def get_bb(self):
-        if self.state == 0 or self.state == 1:
-            return self.x - 32, self.y - 50, self.x + 32, self.y + 10
+        if self.state == "right2" or self.state == "left2":
+            return self.x - 32, self.y - 50, self.x + 32, self.y
         else:
             return self.x - 32, self.y - 50, self.x + 32, self.y - 10
 

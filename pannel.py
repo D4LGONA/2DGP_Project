@@ -12,7 +12,7 @@ class Pannel:
 
     def draw(self):
         self.image.draw(300, 300, 600, 600)
-        draw_rectangle((self.cx - 32)/6, (self.cy -32)/6, (self.cx + 32)/6, (self.cy + 32)/6 )
+        draw_rectangle((self.cx - 32)/6, (self.cy - 32)/6, (self.cx + 32)/6, (self.cy + 32)/6 )
 
     def update(self):
         pass

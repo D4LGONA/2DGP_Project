@@ -1,19 +1,23 @@
 import random
-
 from pico2d import *
 import game_framework
 import game_world
 import pannel
 from background import Background
-from dog import Dog
+from dog import Dog, Idle
 import map_mode
 from huddle import Huddle
-
 
 centerX = 300
 centerY = 300
 
+success_count = 0
+fail_count = 0
+timer = 0.0
+font = load_font('ENCR10B.TTF', 16)
+
 def handle_events():
+    global timer
     events = get_events()
     for event in events:
         dog.handle_event(event)
@@ -23,14 +27,18 @@ def handle_events():
             if event.key == SDLK_ESCAPE:
                 game_framework.quit()
             elif event.key == SDLK_m:
+                dog.drawX, dog.drawY = 300, 300
+                dog.state_machine.cur_state = Idle
                 game_framework.push_mode(map_mode)
             elif event.key == SDLK_LCTRL:
                 if not dog.isjump:
                     bg.setStop()
         elif event.type == SDL_MOUSEBUTTONDOWN:
             if event.button == SDL_BUTTON_LEFT:
+                timer = get_time()
                 bg.setDest(event.x, 600 - 1 - event.y)
-                huddle.setDest(event.x, 600 - 1 - event.y)
+                for i in huddle:
+                    i.setDest(event.x, 600 - 1 - event.y)
                 dog.setface_dir(event.x, 600 - 1 - event.y)
                 dog.handle_event(event)
 
@@ -41,14 +49,15 @@ def init():
 
     dog = Dog()
     bg = Background()
-    huddle = Huddle(400, 400)
+    huddle = [Huddle() for _ in range(1)]
 
     game_world.add_object(bg, 0)
     game_world.add_object(dog, 2)
-    game_world.add_object(huddle, 1)
+    game_world.add_objects(huddle, 1)
 
-    game_world.add_collision_pair('dog:huddle', dog, huddle)
-    #game_world.add_collision_pair()
+    game_world.add_collision_pair('dog:huddle', dog, None)
+    for i in huddle:
+        game_world.add_collision_pair('dog:huddle', None, i)
     pass
 
 def finish():
@@ -59,10 +68,6 @@ def finish():
 def update():
     global centerX, centerY
     game_world.update()
-    for i in game_world.objects[1]:
-        i.set_depth(dog)
-    for i in game_world.objects[3]:
-        i.set_depth(dog)
     centerX = bg.CX
     centerY = bg.CY
     # print(centerX, centerY)
@@ -72,6 +77,7 @@ def update():
 def draw():
     clear_canvas()
     game_world.render()
+    font.draw(600 - 10, 600 - 50, f'{timer:0.2f}', (255, 255, 0))
     update_canvas()
 
 def pause():
