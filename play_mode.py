@@ -46,6 +46,9 @@ def init():
     game_world.add_object(bg, 0)
     game_world.add_object(dog, 2)
     game_world.add_object(huddle, 1)
+
+    game_world.add_collision_pair('dog:huddle', dog, huddle)
+    #game_world.add_collision_pair()
     pass
 
 def finish():
@@ -56,11 +59,15 @@ def finish():
 def update():
     global centerX, centerY
     game_world.update()
+    for i in game_world.objects[1]:
+        i.set_depth(dog)
+    for i in game_world.objects[3]:
+        i.set_depth(dog)
     centerX = bg.CX
     centerY = bg.CY
     # print(centerX, centerY)
     # fill here
-    #game_world.handle_collisions()
+    game_world.handle_collisions()
 
 def draw():
     clear_canvas()

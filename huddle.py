@@ -1,8 +1,11 @@
-from pico2d import load_image
+from pico2d import load_image, draw_rectangle
 from math import *
 import dog
 import game_framework
 from random import *
+import play_mode
+
+import game_world
 
 '''
 ** todo list **
@@ -34,6 +37,7 @@ class Huddle:
     def draw(self):
         self.frameY = state[self.state]
         Huddle.image.clip_draw(int(self.frameX) * 64, self.frameY * 64, 64, 64, self.x, self.y, 128, 128)
+        draw_rectangle(*self.get_bb())
 
     def setDest(self, x, y): # 목적지와 방향 정하는 것
         # x, y가 300, 300에서 얼마나 떨어져 있는지 확인 하기 x - 300, y - 300 얘를 정규화 x,y랑 300300
@@ -48,19 +52,25 @@ class Huddle:
             self.frameX = (self.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 4
 
         self.x += self.dirX * dog.RUN_SPEED_PPS * game_framework.frame_time
-        #self.CX -= self.dirX * dog.RUN_SPEED_PPS * game_framework.frame_time
         self.y += self.dirY * dog.RUN_SPEED_PPS * game_framework.frame_time
-        #self.CY -= self.dirY * dog.RUN_SPEED_PPS * game_framework.frame_time
 
-        # self.x = min(max(self.x, -(bgWidth//2) + 600), bgWidth//2)
-        # self.CX = min(max(self.CX, 300), 3300)
-        # self.y = min(max(self.y, -(bgHeight//2) + 600), bgHeight//2)
-        # self.CY = min(max(self.CY, 300), 3300)
+        self.x = min(max(self.x, self.CX - 3000), self.CX)
+        self.y = min(max(self.y, self.CY - 3000), self.CY)
         pass
 
-    def getbb(self):
-        return self.x - 32, self.y - 32, self.x + 32, self.y + 32
+    def set_depth(self, dog):
+        if self.y + 10 > dog.y:
+            game_world.move_depth(self, 1)
+        elif self.y + 10 < dog.y:
+            game_world.move_depth(self, 3)
+
+    def get_bb(self):
+        if self.state == 0 or self.state == 1:
+            return self.x - 32, self.y - 50, self.x + 32, self.y + 10
+        else:
+            return self.x - 32, self.y - 50, self.x + 32, self.y - 10
 
     def handle_collision(self, group, other):
         if group == 'dog:huddle':
-            self.iscoll = True
+            if not other.isjump:
+                self.iscoll = True

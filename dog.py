@@ -1,6 +1,7 @@
 from pico2d import *
 import game_framework
 import game_world
+from math import *
 
 '''
  ** Todo list **
@@ -87,9 +88,11 @@ class Run:
 
     @staticmethod
     def do(c):
-        # todo : 프레임 넘기는 거랑 움직이는거 해야 함
-        # print("run 실행 중")
         c.frameX = (c.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 2
+        c.x += c.dirX * RUN_SPEED_PPS * game_framework.frame_time
+        c.y += c.dirY * RUN_SPEED_PPS * game_framework.frame_time
+        c.x = min(max(c.x, 300), 3300)
+        c.y = min(max(c.y, 300), 3300)
         pass
 
     @staticmethod
@@ -187,12 +190,14 @@ class Dog: # 강아지 캐릭터
 
     def __init__(self):
         self.drawX, self.drawY = 300, 300 # 화면 정 중앙에 그리기
+        self.x, self.y = 300, 300
         self.frameX, self.frameY = 0, 0
         self.image = load_image('resources/dog1.png')
         self.state_machine = StateMachine(self)
         self.state_machine.start()
         self.face_dir = 'idle'
         self.isjump = False
+        self.dirX, self.dirY = 0, 0
 
     def update(self):
         self.state_machine.update()
@@ -202,9 +207,11 @@ class Dog: # 강아지 캐릭터
 
     def draw(self):
         self.state_machine.draw()
-        draw_rectangle(*self.getbb())
+        draw_rectangle(*self.get_bb())
 
     def setface_dir(self, x, y):
+        self.setDest(x, y)
+
         x1, y1 = 300, 300
         x2, y2 = 301, 300
         slope1 = (y2-y1) / (x2-x1)
@@ -234,5 +241,13 @@ class Dog: # 강아지 캐릭터
         else:
             self.face_dir = "run_r"
 
-    def getbb(self):
+    def setDest(self, x, y): # 목적지와 방향 정하는 것
+        # x, y가 300, 300에서 얼마나 떨어져 있는지 확인 하기 x - 300, y - 300 얘를 정규화 x,y랑 300300
+        self.dirX = (x-300) / dist((x,y), (300, 300))
+        self.dirY = (y-300) / dist((x, y), (300, 300))
+
+    def get_bb(self):
         return self.drawX - 32, self.drawY - 32, self.drawX + 32, self.drawY + 32
+
+    def handle_collision(self, group, other):
+        pass

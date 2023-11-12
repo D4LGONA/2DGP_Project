@@ -85,6 +85,6 @@ def handle_collisions():
         for a in pairs[0]:
             for b in pairs[1]:
                 if collide(a, b): # a와 b에게 충돌 처리 알아서 하라고 알려줌
-                    a.handle_collision(group, a)
-                    b.handle_collision(group, b)
+                    a.handle_collision(group, b)
+                    b.handle_collision(group, a)
     return None
