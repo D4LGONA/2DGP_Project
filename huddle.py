@@ -1,4 +1,4 @@
-from pico2d import load_image, draw_rectangle
+from pico2d import *
 from math import *
 import dog
 import game_framework
@@ -9,6 +9,8 @@ import game_world
 
 '''
 ** todo list **
+순서대로 안넘으면 fail count 올리기
+허들 넘는거 성공한 카운트 어떻게 잴지 다시 생각 해보기
 '''
 
 state = {"right2": 0, "left2": 1, "right1": 2, "left1": 3}
@@ -19,9 +21,12 @@ FRAMES_PER_ACTION = 4
 
 class Huddle:
     image = None
+    font = None
     def __init__(self, num):
         if Huddle.image == None:
             Huddle.image = load_image('resources/huddle.png')
+        if Huddle.font == None:
+            Huddle.font = load_font('ENCR10B.TTF', 16)
         self.ismoved = False
         self.ischecked = False
         self.number = num
@@ -39,6 +44,8 @@ class Huddle:
         self.frameY = state[self.state]
         Huddle.image.clip_draw(int(self.frameX) * 64, self.frameY * 64, 64, 64, self.x, self.y, 128, 128)
         draw_rectangle(*self.get_bb())
+        self.font.draw(self.x, self.y+30, f'{self.number}')
+
 
     def setDest(self, x, y): # 목적지와 방향 정하는 것
         # x, y가 300, 300에서 얼마나 떨어져 있는지 확인 하기 x - 300, y - 300 얘를 정규화 x,y랑 300300
@@ -72,8 +79,6 @@ class Huddle:
         elif self in game_world.objects[3]:
             if self.y - 10 > 300:
                 game_world.move_depth(self, 1)
-
-
 
 
     def get_bb(self):
