@@ -200,6 +200,8 @@ class Dog: # 강아지 캐릭터
         self.face_dir = 'idle'
         self.isjump = False
         self.dirX, self.dirY = 0, 0
+        #self.shadowX, self.shadowY = 300, 300
+        self.shadow = load_image('resources/shadow.png')
 
     def update(self):
         self.state_machine.update()
@@ -208,6 +210,7 @@ class Dog: # 강아지 캐릭터
         self.state_machine.handle_event(('INPUT', event))
 
     def draw(self):
+        self.shadow.draw(300, 300 - 20, 64, 20)
         self.state_machine.draw()
         draw_rectangle(*self.get_bb())
 
