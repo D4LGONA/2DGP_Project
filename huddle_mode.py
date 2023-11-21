@@ -73,6 +73,13 @@ def init():
     game_world.add_collision_pair('dog:huddle', dog, None)
     for i in huddle:
         game_world.add_collision_pair('dog:huddle', None, i)
+
+    for i in huddle:
+        game_world.add_collision_pair('huddle:huddle', i, None)
+        for j in huddle:
+            if i is not j:
+                game_world.add_collision_pair('huddle:huddle', None, j)
+
     pass
 
 def finish():

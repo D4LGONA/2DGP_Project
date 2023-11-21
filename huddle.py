@@ -87,6 +87,9 @@ class Huddle:
         else:
             return self.x - 32, self.y - 50, self.x + 32, self.y - 10
 
-    def handle_collision(self, group, other):
+    def handle_collision(self, group, other): # 여기 고쳐야 함
+        if group == 'huddle:huddle':
+            if self is not other:
+                self.x, self.y = randint(600, 3000), randint(600, 3000)
         pass
 

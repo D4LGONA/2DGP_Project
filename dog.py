@@ -117,11 +117,11 @@ class Jump:
         pass
 
     @staticmethod
-    def do(c): # todo: frame 증가, 위치 이동
+    def do(c):
         c.frameX = (c.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 2
-        if get_time() - c.jumptime < 0.3:
+        if get_time() - c.jumptime < 0.5:
             c.drawY += 1
-        elif get_time() - c.jumptime < 0.6:
+        elif get_time() - c.jumptime < 1.0:
             # if c.face_dir == ""
             c.drawY -= 1
         else:
