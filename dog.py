@@ -5,7 +5,7 @@ from math import *
 
 import huddle_mode
 
-G = 1
+G = 2
 
 '''
  ** Todo list **
@@ -67,12 +67,16 @@ class Idle:
         c.shadowX = c.x
         c.shadowY = c.y
         c.frameX = (c.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 2
+
+
         pass
 
     @staticmethod
     def draw(c):
         c.frameY = state[c.face_dir]
-        c.image.clip_draw(int(c.frameX) * 32, c.frameY * 32, 32, 32, c.drawX, c.drawY, 64, 64)
+        sx, sy = c.x - c.bg.window_left, c.y - c.bg.window_bottom
+        c.shadow.draw(c.shadowX - c.bg.window_left, c.shadowY - c.bg.window_bottom - 20, 64, 20)
+        c.image.clip_draw(int(c.frameX) * 32, int(c.frameY) * 32, 32, 32, sx, sy, 64, 64)
 
 
 class Run:
@@ -93,12 +97,20 @@ class Run:
         c.y += c.dirY * RUN_SPEED_PPS * game_framework.frame_time
         c.shadowX = c.x
         c.shadowY = c.y
+
+        c.frameY = state[c.face_dir]
+        sx, sy = c.x - c.bg.window_left, c.y - c.bg.window_bottom
+        c.shadow.draw(c.shadowX - c.bg.window_left, c.shadowY - c.bg.window_bottom - 20, 64, 20)
+        c.image.clip_draw(int(c.frameX) * 32, int(c.frameY) * 32, 32, 32, sx, sy, 64, 64)
         pass
 
     @staticmethod
     def draw(c):
         c.frameY = state[c.face_dir]
-        #c.image.clip_draw(int(c.frameX) * 32, c.frameY * 32, 32, 32, c.drawX, c.drawY, 64, 64)
+        sx, sy = c.x - c.bg.window_left, c.y - c.bg.window_bottom
+        c.shadow.draw(c.shadowX - c.bg.window_left, c.shadowY - c.bg.window_bottom - 20, 64, 20)
+        c.image.clip_draw(int(c.frameX) * 32, int(c.frameY) * 32, 32, 32, sx, sy, 64, 64)
+
 
 class Jump:
 
@@ -118,18 +130,18 @@ class Jump:
 
     @staticmethod
     def do(c):
+        print("jump do")
         c.frameX = (c.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 2
         c.x += c.dirX * RUN_SPEED_PPS * game_framework.frame_time
         c.y += c.dirY * RUN_SPEED_PPS * game_framework.frame_time
 
         c.shadowX = c.x
-        c.shadowY = c.y
-        c.shadowY -= c.jump
+        c.shadowY = c.y - c.jump
 
-        if get_time() - c.jumptime < 0.5:
+        if get_time() - c.jumptime < 0.4:
             c.jump += G
             c.y += G
-        elif get_time() - c.jumptime < 1.0:
+        elif get_time() - c.jumptime < 0.8:
             c.jump -= G
             c.y -= G
         else:
@@ -139,7 +151,9 @@ class Jump:
     @staticmethod
     def draw(c):
         c.frameY = state[c.face_dir]
-        c.image.clip_draw(int(c.frameX) * 32, c.frameY * 32, 32, 32, c.drawX, c.drawY, 64, 64)
+        sx, sy = c.x - c.bg.window_left, c.y - c.bg.window_bottom
+        c.shadow.draw(c.shadowX - c.bg.window_left, c.shadowY - c.bg.window_bottom - 20, 64, 20)
+        c.image.clip_draw(int(c.frameX) * 32, int(c.frameY) * 32, 32, 32, sx, sy + c.jump, 64, 64)
         pass
 
 
@@ -148,6 +162,7 @@ class Stop:
     @staticmethod
     def enter(c, e):
         c.frameX = 0
+        c.dirX, c.dirY = 0, 0
         pass
 
     @staticmethod
@@ -162,7 +177,9 @@ class Stop:
     @staticmethod
     def draw(c):
         c.frameY = state[c.face_dir]
-        c.image.clip_draw(int(c.frameX) * 32, c.frameY * 32, 32, 32, c.drawX, c.drawY, 64, 64)
+        sx, sy = c.x - c.bg.window_left, c.y - c.bg.window_bottom
+        c.shadow.draw(c.shadowX - c.bg.window_left, c.shadowY - c.bg.window_bottom - 20, 64, 20)
+        c.image.clip_draw(int(c.frameX) * 32, int(c.frameY) * 32, 32, 32, sx, sy, 64, 64)
         pass
 
 class StateMachine:
@@ -222,12 +239,12 @@ class Dog: # 강아지 캐릭터
 
     def draw(self):
 
-        self.frameY = state[self.face_dir]
-        sx, sy = self.x - self.bg.window_left, self.y - self.bg.window_bottom
-        self.shadow.draw(self.shadowX - self.bg.window_left, self.shadowY - self.bg.window_bottom - 20, 64, 20)
-        self.image.clip_draw(int(self.frameX) * 32, int(self.frameY) * 32, 32, 32, sx, sy, 64, 64)
-        # self.state_machine.draw()
-        # draw_rectangle(*self.get_bb())
+        # self.frameY = state[self.face_dir]
+        # sx, sy = self.x - self.bg.window_left, self.y - self.bg.window_bottom
+        # self.shadow.draw(self.shadowX - self.bg.window_left, self.shadowY - self.bg.window_bottom - 20, 64, 20)
+        # self.image.clip_draw(int(self.frameX) * 32, int(self.frameY) * 32, 32, 32, sx, sy, 64, 64)
+        self.state_machine.draw()
+        draw_rectangle(*self.get_bb())
 
 
     def set_background(self, bg):

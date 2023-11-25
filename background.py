@@ -16,5 +16,10 @@ class Background:
         self.image.clip_draw_to_origin(self.window_left, self.window_bottom, self.cw, self.ch, 0, 0)
 
     def update(self):
-        self.window_left = clamp(0, int(game_framework.get_mode().dog.x) - self.cw // 2, self.w - self.cw - 1)
-        self.window_bottom = clamp(0, int(game_framework.get_mode().dog.y) - self.ch // 2 , self.h - self.ch - 1)
+        if game_framework.get_mode().dog.isjump:
+            self.window_left = clamp(0, int(game_framework.get_mode().dog.x) - self.cw // 2, self.w - self.cw - 1)
+            self.window_bottom = clamp(0, int(game_framework.get_mode().dog.y - game_framework.get_mode().dog.jump) - self.ch // 2, self.h - self.ch - 1)
+
+        else:
+            self.window_left = clamp(0, int(game_framework.get_mode().dog.x) - self.cw // 2, self.w - self.cw - 1)
+            self.window_bottom = clamp(0, int(game_framework.get_mode().dog.y) - self.ch // 2 , self.h - self.ch - 1)

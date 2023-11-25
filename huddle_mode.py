@@ -42,10 +42,6 @@ def handle_events():
                     timerStart = True
                     timer = 0.0
                     start_time = get_time()
-                for i in game_world.objects[1]:
-                    i.setDest(event.x, 600 - 1 - event.y)
-                for i in game_world.objects[3]:
-                    i.setDest(event.x, 600 - 1 - event.y)
                 dog.setface_dir(event.x, 600 - 1 - event.y)
                 dog.handle_event(event)
 
