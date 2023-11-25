@@ -1,38 +1,20 @@
-from pico2d import load_image
+from pico2d import *
 from math import *
-import dog
+import huddle_mode as play_mode
+import server
 import game_framework
 
-bgWidth = 3600
-bgHeight = 3600
-
 class Background:
-    def __init__(self, x = bgWidth // 2, y = bgHeight // 2):
+    def __init__(self):
         self.image = load_image('resources/bg.png')
-        self.x, self.y = x, y
-        self.count = 0
-        self.speed = 1
-        self.dirX, self.dirY = 0.0, 0.0
-        self.CX, self.CY = 300, 300
+        self.cw = 600
+        self.ch = 600
+        self.w = self.image.w
+        self.h = self.image.h
 
     def draw(self):
-        self.image.draw(self.x, self.y, bgWidth, bgHeight)
-
-    def setDest(self, x, y): # 목적지와 방향 정하는 것
-        # x, y가 300, 300에서 얼마나 떨어져 있는지 확인 하기 x - 300, y - 300 얘를 정규화 x,y랑 300300
-        self.dirX = -1 * (x-300) / dist((x,y), (300, 300))
-        self.dirY = -1 * (y-300) / dist((x, y), (300, 300))
-
-    def setStop(self):
-        self.dirX, self.dirY = 0, 0
+        self.image.clip_draw_to_origin(self.window_left, self.window_bottom, self.cw, self.ch, 0, 0)
 
     def update(self):
-        self.x += self.dirX * dog.RUN_SPEED_PPS * game_framework.frame_time
-        self.CX -= self.dirX * dog.RUN_SPEED_PPS * game_framework.frame_time
-        self.y += self.dirY * dog.RUN_SPEED_PPS * game_framework.frame_time
-        self.CY -= self.dirY * dog.RUN_SPEED_PPS * game_framework.frame_time
-        self.x = min(max(self.x, -(bgWidth//2) + 600), bgWidth//2)
-        self.CX = min(max(self.CX, 300), 3300)
-        self.y = min(max(self.y, -(bgHeight//2) + 600), bgHeight//2)
-        self.CY = min(max(self.CY, 300), 3300)
-        pass
+        self.window_left = clamp(0, int(game_framework.get_mode().dog.x) - self.cw // 2, self.w - self.cw - 1)
+        self.window_bottom = clamp(0, int(game_framework.get_mode().dog.y) - self.ch // 2 , self.h - self.ch - 1)

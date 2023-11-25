@@ -1,6 +1,9 @@
 import time
 
 
+def get_mode():
+    return stack[-1]
+
 def change_mode(mode):
     global stack
     if (len(stack) > 0):

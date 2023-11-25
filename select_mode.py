@@ -5,25 +5,30 @@ import huddle_mode
 from map import Map
 
 class Selectmode:
-    def __init__(self, s):
-        self.image = load_image(s)
+    def __init__(self):
+        #self.image = load_image(s)
         self.x, self.y = 300, 300
 
     def draw(self):
-        self.image.draw(self.x, self.y, 600, 600)
-        draw_rectangle(*self.get_bb())
+        #self.image.draw(self.x, self.y, 600, 600)
+        draw_rectangle(*self.get_practice())
+        draw_rectangle(*self.get_start())
+        draw_rectangle(*self.get_back())
 
     def update(self):
         pass
 
     def check_start(self, x, y):
-        tmp = self.get_bb()
-        if tmp[0] <= x <= tmp[2] and tmp[1] <= y <= tmp[3]:
-            game_framework.change_mode(huddle_mode)
-
-    def get_bb(self):
-        return self.x - 150, self.y - 270, self.x + 120, self.y - 160
         pass
+
+    def get_start(self):
+        return 200, 200, 400, 250
+
+    def get_practice(self):
+        return 200, 350, 400, 400
+
+    def get_back(self):
+        return 0, 600, 100, 550
 
 def handle_events():
     events = get_events()
@@ -36,12 +41,14 @@ def handle_events():
         elif event.type == SDL_MOUSEBUTTONDOWN:
             if event.button == SDL_BUTTON_LEFT:
                 pass
-
     pass
 
 
 def init():
+    global sel
 
+    sel = Selectmode()
+    game_world.add_object(sel, 0)
     pass
 
 def finish():

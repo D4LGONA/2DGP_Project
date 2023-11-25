@@ -34,19 +34,14 @@ def handle_events():
             if event.key == SDLK_ESCAPE:
                 game_framework.quit()
             elif event.key == SDLK_m:
-                dog.drawX, dog.drawY = 300, 300
                 dog.state_machine.cur_state = Idle
                 game_framework.push_mode(map_mode)
-            elif event.key == SDLK_LCTRL:
-                if not dog.isjump:
-                    bg.setStop()
         elif event.type == SDL_MOUSEBUTTONDOWN:
             if event.button == SDL_BUTTON_LEFT:
                 if not timerStart:
                     timerStart = True
                     timer = 0.0
                     start_time = get_time()
-                bg.setDest(event.x, 600 - 1 - event.y)
                 for i in game_world.objects[1]:
                     i.setDest(event.x, 600 - 1 - event.y)
                 for i in game_world.objects[3]:
@@ -80,6 +75,8 @@ def init():
             if i is not j:
                 game_world.add_collision_pair('huddle:huddle', None, j)
 
+    dog.set_background(bg)
+
     pass
 
 def finish():
@@ -94,8 +91,10 @@ def update():
     else:
         timer = get_time() - start_time
     game_world.update()
+    '''
     centerX = bg.CX
     centerY = bg.CY
+    '''
     game_world.handle_collisions()
 
 def draw():

@@ -11,6 +11,7 @@ import game_world
 ** todo list **
 순서대로 안넘으면 fail count 올리기
 허들 넘는거 성공한 카운트 어떻게 잴지 다시 생각 해보기
+여기 수정해야 함
 '''
 
 state = {"right2": 0, "left2": 1, "right1": 2, "left1": 3}
@@ -31,7 +32,7 @@ class Huddle:
         self.ischecked = False
         self.number = num
         self.frameX, self.frameY = 0, 3
-        self.x, self.y = randint(600, 3000), randint(600, 3000)
+        self.x, self.y = randint(300, 3300), randint(600, 3000)
         self.CX, self.CY = self.x, self.y
         self.dirX, self.dirY = 0.0, 0.0
         self.state_value = randint(0, 3)
@@ -42,7 +43,8 @@ class Huddle:
 
     def draw(self):
         self.frameY = state[self.state]
-        Huddle.image.clip_draw(int(self.frameX) * 64, self.frameY * 64, 64, 64, self.x, self.y, 128, 128)
+        Huddle.image.clip_draw(int(self.frameX) * 64, self.frameY * 64, 64, 64,
+                               self.x - game_framework.get_mode().bg.window_left, self.y - game_framework.get_mode().bg.window_bottom, 128, 128)
         draw_rectangle(*self.get_bb())
         self.font.draw(self.x, self.y+30, f'{self.number}')
 
@@ -56,19 +58,6 @@ class Huddle:
         self.dirX, self.dirY = 0, 0
 
     def update(self):
-        if self.ismoved:
-            self.ismoved = False
-            return
-        self.set_depth()
-
-        if self.iscoll and self.frameX < 3:
-            self.frameX = (self.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 4
-
-        self.x += self.dirX * dog.RUN_SPEED_PPS * game_framework.frame_time
-        self.y += self.dirY * dog.RUN_SPEED_PPS * game_framework.frame_time
-
-        self.x = min(max(self.x, self.CX - 3000), self.CX)
-        self.y = min(max(self.y, self.CY - 3000), self.CY)
         pass
 
     def set_depth(self):

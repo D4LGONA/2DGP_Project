@@ -5,13 +5,13 @@ from math import *
 
 import huddle_mode
 
+G = 1
+
 '''
  ** Todo list **
  Jump 상태일 때 맵 보기로 넘어가면 제자리로 돌아오지 않는 문제
  -> 상태를 확인하고 map mode에서 update를 돌릴지 말지 설정하는 방법이 없을까?
  Jump 가속도 수정하기
- 강아지 리소스 수정하기(멈추는 것과 점프 모션을 다시 정할 것)
- 강아지 그림자 추가하기
 
 '''
 
@@ -49,11 +49,6 @@ def time_out(e):
 
 # time_out = lambda e : e[0] == 'TIME_OUT'
 
-
-# todo: state에 있어야 할 것은 무엇이 있는가 -
-#  달리는 모습(run:좌클릭 눌렀을 때), 서있는 모습(idle:run에서 목적지 닿았을때),
-#  앉아있는 모습(idle, run에서 lctrl눌렀을때), 점프하는 모습 ??? space눌러씅ㄹ때
-
 # 상태 목록: idle, run, stop, jump
 class Idle:
 
@@ -69,6 +64,8 @@ class Idle:
     @staticmethod
     def do(c):
         # print("idle 실행 중")
+        c.shadowX = c.x
+        c.shadowY = c.y
         c.frameX = (c.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 2
         pass
 
@@ -90,17 +87,18 @@ class Run:
 
     @staticmethod
     def do(c):
+
         c.frameX = (c.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 2
         c.x += c.dirX * RUN_SPEED_PPS * game_framework.frame_time
         c.y += c.dirY * RUN_SPEED_PPS * game_framework.frame_time
-        c.x = min(max(c.x, 300), 3300)
-        c.y = min(max(c.y, 300), 3300)
+        c.shadowX = c.x
+        c.shadowY = c.y
         pass
 
     @staticmethod
     def draw(c):
         c.frameY = state[c.face_dir]
-        c.image.clip_draw(int(c.frameX) * 32, c.frameY * 32, 32, 32, c.drawX, c.drawY, 64, 64)
+        #c.image.clip_draw(int(c.frameX) * 32, c.frameY * 32, 32, 32, c.drawX, c.drawY, 64, 64)
 
 class Jump:
 
@@ -109,21 +107,31 @@ class Jump:
         c.frameX = 0
         c.jumptime = get_time()
         c.isjump = True
+        c.jump = 0.0
         pass
 
     @staticmethod
     def exit(c, e):
         c.isjump = False
+        c.jump = 1.0
         pass
 
     @staticmethod
     def do(c):
         c.frameX = (c.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 2
+        c.x += c.dirX * RUN_SPEED_PPS * game_framework.frame_time
+        c.y += c.dirY * RUN_SPEED_PPS * game_framework.frame_time
+
+        c.shadowX = c.x
+        c.shadowY = c.y
+        c.shadowY -= c.jump
+
         if get_time() - c.jumptime < 0.5:
-            c.drawY += 1
+            c.jump += G
+            c.y += G
         elif get_time() - c.jumptime < 1.0:
-            # if c.face_dir == ""
-            c.drawY -= 1
+            c.jump -= G
+            c.y -= G
         else:
             c.state_machine.handle_event(('TIME_OUT', 0))
 
@@ -191,7 +199,6 @@ class StateMachine:
 class Dog: # 강아지 캐릭터
 
     def __init__(self):
-        self.drawX, self.drawY = 300, 300 # 화면 정 중앙에 그리기
         self.x, self.y = 300, 300
         self.frameX, self.frameY = 0, 0
         self.image = load_image('resources/dog1.png')
@@ -200,32 +207,46 @@ class Dog: # 강아지 캐릭터
         self.face_dir = 'idle'
         self.isjump = False
         self.dirX, self.dirY = 0, 0
-        #self.shadowX, self.shadowY = 300, 300
+        self.shadowX, self.shadowY = 300, 300
         self.shadow = load_image('resources/shadow.png')
+        self.jump = 0.0
 
     def update(self):
         self.state_machine.update()
+
+        self.x = clamp(32.0, self.x, self.bg.w - 32.0)
+        self.y = clamp(32.0, self.y, self.bg.h - 32.0)
 
     def handle_event(self, event):
         self.state_machine.handle_event(('INPUT', event))
 
     def draw(self):
-        self.shadow.draw(300, 300 - 20, 64, 20)
-        self.state_machine.draw()
-        draw_rectangle(*self.get_bb())
+
+        self.frameY = state[self.face_dir]
+        sx, sy = self.x - self.bg.window_left, self.y - self.bg.window_bottom
+        self.shadow.draw(self.shadowX - self.bg.window_left, self.shadowY - self.bg.window_bottom - 20, 64, 20)
+        self.image.clip_draw(int(self.frameX) * 32, int(self.frameY) * 32, 32, 32, sx, sy, 64, 64)
+        # self.state_machine.draw()
+        # draw_rectangle(*self.get_bb())
+
+
+    def set_background(self, bg):
+        self.bg = bg
+        self.x = self.bg.w / 2
+        self.y = self.bg.h / 2
 
     def setface_dir(self, x, y):
         self.setDest(x, y)
 
-        x1, y1 = 300, 300
-        x2, y2 = 301, 300
+        x1, y1 = self.x, self.y
+        x2, y2 = self.x + 1, self.y
         slope1 = (y2-y1) / (x2-x1)
-        slope2 = (y-y1) / (x-x1)
+        slope2 = (y + self.bg.window_bottom - y1) / (x + self.bg.window_left - x1)
 
         angle_radians = math.atan2((slope2 - slope1) ,(1 + slope1 * slope2))
         angle_degrees = math.degrees(angle_radians)
         angle_degrees = (angle_degrees + 360) % 360
-        if x < 300:
+        if x + self.bg.window_left < self.x:
             angle_degrees = (angle_degrees + 180) % 360
         print(angle_degrees)
 
@@ -246,13 +267,18 @@ class Dog: # 강아지 캐릭터
         else:
             self.face_dir = "run_r"
 
+
+
     def setDest(self, x, y): # 목적지와 방향 정하는 것
         # x, y가 300, 300에서 얼마나 떨어져 있는지 확인 하기 x - 300, y - 300 얘를 정규화 x,y랑 300300
-        self.dirX = (x-300) / dist((x,y), (300, 300))
-        self.dirY = (y-300) / dist((x, y), (300, 300))
+        print(self.x, self.y)
+        dx = x + self.bg.window_left
+        dy = y + self.bg.window_bottom
+        self.dirX = (dx-self.x) / dist((dx, dy), (self.x, self.y))
+        self.dirY = (dy-self.y) / dist((dx, dy), (self.x, self.y))
 
     def get_bb(self):
-        return self.drawX - 32, self.drawY - 32, self.drawX + 32, self.drawY + 32
+        return self.x - 32, self.y - 32, self.x + 32, self.y + 32
 
     def handle_collision(self, group, other):
         if group == 'dog:huddle':
