@@ -98,10 +98,6 @@ class Run:
         c.shadowX = c.x
         c.shadowY = c.y
 
-        c.frameY = state[c.face_dir]
-        sx, sy = c.x - c.bg.window_left, c.y - c.bg.window_bottom
-        c.shadow.draw(c.shadowX - c.bg.window_left, c.shadowY - c.bg.window_bottom - 20, 64, 20)
-        c.image.clip_draw(int(c.frameX) * 32, int(c.frameY) * 32, 32, 32, sx, sy, 64, 64)
         pass
 
     @staticmethod
@@ -265,7 +261,6 @@ class Dog: # 강아지 캐릭터
         angle_degrees = (angle_degrees + 360) % 360
         if x + self.bg.window_left < self.x:
             angle_degrees = (angle_degrees + 180) % 360
-        print(angle_degrees)
 
         if angle_degrees > 22.5 and angle_degrees <= 45 + 22.5:
             self.face_dir = "run_ru"
@@ -295,7 +290,8 @@ class Dog: # 강아지 캐릭터
         self.dirY = (dy-self.y) / dist((dx, dy), (self.x, self.y))
 
     def get_bb(self):
-        return self.x - 32, self.y - 32, self.x + 32, self.y + 32
+        return (self.x - self.bg.window_left - 32, self.y - self.bg.window_bottom - 32
+                , self.x - self.bg.window_left + 32, self.y - self.bg.window_bottom + 32)
 
     def handle_collision(self, group, other):
         if group == 'dog:huddle':

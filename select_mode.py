@@ -2,6 +2,7 @@ from pico2d import *
 import game_framework
 import game_world
 import title_mode
+import select_mode_2
 
 class Selectmode:
     def __init__(self):

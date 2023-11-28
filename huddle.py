@@ -48,10 +48,10 @@ class Huddle:
 
     def update(self):
 
-        self.dx, self.dy = self.x - game_framework.get_mode().bg.window_left, self.y - game_framework.get_mode().bg.window_bottom
+        if self.iscoll and self.frameX < 3:
+            self.frameX = (self.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
 
-        # if game_framework.get_mode().dog.isjump:
-            # self.dy -= game_framework.get_mode().dog.jump
+        self.dx, self.dy = self.x - game_framework.get_mode().bg.window_left, self.y - game_framework.get_mode().bg.window_bottom
 
         # Todo: 여기 방향에 따라 depth 이동하는거 수정하기
         if not game_framework.get_mode().dog.isjump:
@@ -74,7 +74,7 @@ class Huddle:
         else:
             return self.dx - 32, self.dy - 50, self.dx + 32, self.dy - 10
 
-    def handle_collision(self, group, other): # 여기 고쳐야 함
+    def handle_collision(self, group, other):
         if group == 'huddle:huddle':
             if self is not other:
                 self.x, self.y = randint(300, 3300), randint(300, 3300)
