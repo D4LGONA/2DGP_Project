@@ -20,7 +20,7 @@ class Title:
     def check_start(self, x, y):
         tmp = self.get_bb()
         if tmp[0] <= x <= tmp[2] and tmp[1] <= y <= tmp[3]:
-            game_framework.change_mode(huddle_mode)
+            game_framework.change_mode(select_mode)
 
     def get_bb(self):
         return self.x - 150, self.y - 270, self.x + 120, self.y - 160
