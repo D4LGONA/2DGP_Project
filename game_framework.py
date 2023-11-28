@@ -2,7 +2,7 @@ import time
 
 
 def get_mode():
-    return stack[-1]
+    return stack
 
 def change_mode(mode):
     global stack

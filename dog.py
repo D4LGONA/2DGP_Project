@@ -234,11 +234,6 @@ class Dog: # 강아지 캐릭터
         self.state_machine.handle_event(('INPUT', event))
 
     def draw(self):
-
-        # self.frameY = state[self.face_dir]
-        # sx, sy = self.x - self.bg.window_left, self.y - self.bg.window_bottom
-        # self.shadow.draw(self.shadowX - self.bg.window_left, self.shadowY - self.bg.window_bottom - 20, 64, 20)
-        # self.image.clip_draw(int(self.frameX) * 32, int(self.frameY) * 32, 32, 32, sx, sy, 64, 64)
         self.state_machine.draw()
         draw_rectangle(*self.get_bb())
 

@@ -3,6 +3,7 @@ from pico2d import *
 import game_framework
 import game_world
 import map
+import select_mode_2
 from background import Background
 from dog import Dog, Idle
 import map_mode
@@ -32,7 +33,7 @@ def handle_events():
             game_framework.quit()
         elif event.type == SDL_KEYDOWN:
             if event.key == SDLK_ESCAPE:
-                game_framework.quit()
+                game_framework.change_mode(select_mode_2)
             elif event.key == SDLK_m:
                 dog.state_machine.cur_state = Idle
                 game_framework.push_mode(map_mode)
@@ -75,7 +76,7 @@ def init():
 
     pass
 
-def finish():
+def finish(): # Todo: 객체가 지워지지 않아요 ㅠㅠ
     game_world.clear()
     pass
 
@@ -87,10 +88,6 @@ def update():
     else:
         timer = get_time() - start_time
     game_world.update()
-    '''
-    centerX = bg.CX
-    centerY = bg.CY
-    '''
     game_world.handle_collisions()
 
 def draw():

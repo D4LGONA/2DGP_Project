@@ -51,20 +51,20 @@ class Huddle:
         if self.iscoll and self.frameX < 3:
             self.frameX = (self.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
 
-        self.dx, self.dy = self.x - game_framework.get_mode().bg.window_left, self.y - game_framework.get_mode().bg.window_bottom
+        self.dx, self.dy = self.x - game_framework.get_mode()[-1].bg.window_left, self.y - game_framework.get_mode()[-1].bg.window_bottom
 
         # Todo: 여기 방향에 따라 depth 이동하는거 수정하기
-        if not game_framework.get_mode().dog.isjump:
+        if not game_framework.get_mode()[-1].dog.isjump:
             self.set_depth()
         pass
 
     def set_depth(self):
         if self in game_world.objects[1]:
-            if self.y - 20 < game_framework.get_mode().dog.y:
+            if self.y - 20 < game_framework.get_mode()[-1].dog.y:
                 game_world.move_depth(self, 3)
                 self.ismoved = True
         elif self in game_world.objects[3]:
-            if self.y - 20 > game_framework.get_mode().dog.y:
+            if self.y - 20 > game_framework.get_mode()[-1].dog.y:
                 game_world.move_depth(self, 1)
 
 
