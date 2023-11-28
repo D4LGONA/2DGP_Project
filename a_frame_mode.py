@@ -6,22 +6,14 @@ import map
 from background import Background
 from dog import Dog, Idle
 import map_mode
-from huddle import Huddle
-
-centerX = 300
-centerY = 300
+from a_frame import Aframe
 
 success_count = 0
 fail_count = 0
 timer = 0.0
 start_time = 0.0
 timerStart = False
-huddle_count = 20
-
-'''
-Todo
-'''
-
+a_frame_count = 20
 
 def handle_events():
     global timerStart, timer, start_time
@@ -48,28 +40,28 @@ def handle_events():
 def init():
     global dog
     global bg
-    global huddle
+    global a_frame
 
     global font
     font = load_font('ENCR10B.TTF', 16)
 
     dog = Dog()
     bg = Background()
-    huddle = [Huddle(i + 1) for i in range(20)]
+    a_frame = [Aframe(i + 1) for i in range(20)]
 
     game_world.add_object(bg, 0)
     game_world.add_object(dog, 2)
-    game_world.add_objects(huddle, 1)
+    game_world.add_objects(a_frame, 1)
 
-    game_world.add_collision_pair('dog:huddle', dog, None)
-    for i in huddle:
-        game_world.add_collision_pair('dog:huddle', None, i)
+    game_world.add_collision_pair('dog:a_frame', dog, None)
+    for i in a_frame:
+        game_world.add_collision_pair('dog:a_frame', None, i)
 
-    for i in huddle:
-        game_world.add_collision_pair('huddle:huddle', i, None)
-        for j in huddle:
+    for i in a_frame:
+        game_world.add_collision_pair('a_frame:a_frame', i, None)
+        for j in a_frame:
             if i is not j:
-                game_world.add_collision_pair('huddle:huddle', None, j)
+                game_world.add_collision_pair('a_frame:a_frame', None, j)
 
     dog.set_background(bg)
 
@@ -87,10 +79,6 @@ def update():
     else:
         timer = get_time() - start_time
     game_world.update()
-    '''
-    centerX = bg.CX
-    centerY = bg.CY
-    '''
     game_world.handle_collisions()
 
 def draw():
@@ -99,7 +87,7 @@ def draw():
     font.draw(600 - 200, 600 - 20, f'PLAYTIME: {timer:0.2f}', (0, 0, 0))
     font.draw(600 - 200, 600 - 40, f'SUCCESS: {success_count}', (0, 0, 0))
     font.draw(600 - 200, 600 - 60, f'FAIL: {fail_count}', (0, 0, 0))
-    font.draw(600 - 200, 600 - 80, f'REMAIN: {huddle_count} / 20', (0,0,0))
+    font.draw(600 - 200, 600 - 80, f'REMAIN: {a_frame_count} / 20', (0,0,0))
     update_canvas()
 
 def pause():
