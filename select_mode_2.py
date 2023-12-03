@@ -84,6 +84,7 @@ def init():
     pass
 
 def finish():
+    game_world.clear()
     pass
 
 def update():

@@ -3,11 +3,6 @@ objects = [[] for _ in range(4)]
 # fill here
 collision_pairs = {} # {'boy:ball' : [[boy], [balls]]}
 
-'''
-** todo list **
-오브젝트 간의 depth 이동
-'''
-
 def move_depth(o, depth):
     for i in objects:
         if o in i:
@@ -50,6 +45,8 @@ def remove_collision_object(o):
         if o in pairs[1]:
             pairs[1].remove(o)
 
+def clear_collision_object():
+    collision_pairs.clear()
 
 def remove_object(o):
     for layer in objects:
@@ -62,7 +59,11 @@ def remove_object(o):
 
 
 def clear():
+    print(objects[0])
+    clear_collision_object()
     for layer in objects:
+        for o in layer:
+            remove_collision_object(o)
         layer.clear()
 
 

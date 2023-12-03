@@ -21,12 +21,13 @@ class Aframe:
         self.ismoved = False
         self.ischecked = False
         self.number = num
-        self.frameX, self.frameY = 0, 3
+        self.frameX, self.frameY = 0, 0
         self.x, self.y = randint(300, 3300), randint(300, 3300)
         self.state_value = randint(0, 3)
         self.state = [i for i, v in state.items() if v == self.state_value][0]
         self.iscoll = False
         self.dx, self.dy = 0, 0
+        self.selected = False
 
     def draw(self):
         self.frameY = state[self.state]

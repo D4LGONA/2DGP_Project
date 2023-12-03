@@ -152,7 +152,6 @@ class Jump:
         c.image.clip_draw(int(c.frameX) * 32, int(c.frameY) * 32, 32, 32, sx, sy + c.jump, 64, 64)
         pass
 
-
 class Stop:
 
     @staticmethod
@@ -298,3 +297,11 @@ class Dog: # 강아지 캐릭터
                 else:
                     huddle_mode.fail_count += 1
                     other.iscoll = True
+        elif group == 'dog:a_frame':
+            pass
+        elif group == 'dog:seesaw':
+            pass
+        elif group == 'dog:tunnel':
+            pass
+        elif group == 'dog:d':
+            pass

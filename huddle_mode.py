@@ -19,11 +19,6 @@ start_time = 0.0
 timerStart = False
 huddle_count = 20
 
-'''
-Todo
-'''
-
-
 def handle_events():
     global timerStart, timer, start_time
     events = get_events()
@@ -82,7 +77,11 @@ def finish(): # Todo: 객체가 지워지지 않아요 ㅠㅠ
 
 
 def update():
-    global centerX, centerY, timer
+    if huddle_count == 0:
+        pass
+
+
+    global timer
     if not timerStart:
         timer = 0.0
     else:
