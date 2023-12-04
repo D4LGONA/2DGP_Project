@@ -8,6 +8,7 @@ def move_depth(o, depth):
         if o in i:
             i.remove(o)
     objects[depth].append(o)
+    objects[depth].sort(key=lambda obj:obj.y)
     pass
 
 def add_object(o, depth = 0):
@@ -79,12 +80,65 @@ def collide(a, b):
 
     return True
 
+def init_collide(a, b):
+    if a == b: return False
+    la, ba, ra, ta = a.get_init_bb()
+    lb, bb, rb, tb = b.get_init_bb()
 
-def handle_collisions():
-    for group, pairs in collision_pairs.items():
-        for a in pairs[0]:
-            for b in pairs[1]:
-                if collide(a, b): # a와 b에게 충돌 처리 알아서 하라고 알려줌
-                    a.handle_collision(group, b)
-                    b.handle_collision(group, a)
+    if la > rb: return False
+    if ra < lb: return False
+    if ta < bb: return False
+    if ba > tb: return False
+    print(a, b)
+    return True
+
+def obs_collide(a, b):
+    la, ba, ra, ta = a.get_bb()
+    coll_list_b = b.get_obs_bb()
+
+    for lb, bb, rb, tb in coll_list_b:
+        if la <= rb and ra >= lb and ta >= bb and ba <= tb:
+            overlap_left = ra - lb
+            overlap_right = rb - la
+            overlap_bottom = ta - bb
+            overlap_top = tb - ba
+
+            min_overlap = min(overlap_left, overlap_right, overlap_bottom, overlap_top)
+
+            if min_overlap == overlap_left:
+                return (True, 'left')
+            elif min_overlap == overlap_right:
+                return (True, 'right')
+            elif min_overlap == overlap_bottom:
+                return (True, 'bottom')
+            elif min_overlap == overlap_top:
+                return (True, 'top')
+
+    return (False, None)  # 모든 객체와의 충돌을 확인한 후에 충돌이 없으면 False 반환
+
+
+
+def handle_init_collisions(group):
+    flag = True
+    for a in collision_pairs[group][0]:
+        for b in collision_pairs[group][1]:
+            if a is not b and init_collide(a, b):
+                flag = False
+                a.handle_collision(group, b)
+    return flag
+
+def handle_collisions(group):
+    for a in collision_pairs[group][0]:
+        for b in collision_pairs[group][1]:
+            if collide(a, b): # a와 b에게 충돌 처리 알아서 하라고 알려줌
+                a.handle_collision(group, b)
+                b.handle_collision(group, a)
+    return None
+
+def handle_obs_collisions(group):
+    for a in collision_pairs[group][0]:
+        for b in collision_pairs[group][1]:
+            q = obs_collide(a, b)
+            if q[0]: # a와 b에게 충돌 처리 알아서 하라고 알려줌
+                a.handle_obs_collision(group, b, q[1])
     return None

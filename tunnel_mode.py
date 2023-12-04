@@ -2,11 +2,10 @@ import random
 from pico2d import *
 import game_framework
 import game_world
-import select_mode_2
 from background import Background
-from dog import Dog, Idle
+from dog import Dog, Idle, Run
 import map_mode
-from huddle import Huddle
+from tunnel import Tunnel
 import clear_mode
 
 success_count = 0
@@ -25,7 +24,7 @@ def handle_events():
             game_framework.quit()
         elif event.type == SDL_KEYDOWN:
             if event.key == SDLK_ESCAPE:
-                game_framework.change_mode(select_mode_2)
+                game_framework.quit()
             elif event.key == SDLK_m:
                 dog.state_machine.cur_state = Idle
                 game_framework.push_mode(map_mode)
@@ -45,42 +44,33 @@ def handle_events():
 def init():
     global dog
     global bg
-    global huddle
+    global t
+
     global font
-    global success_count, fail_count, timer, start_time, timerStart, obstacle_count
-
-    success_count = 0
-    fail_count = 0
-    timer = 0.0
-    start_time = 0.0
-    timerStart = False
-    obstacle_count = 20
-
     font = load_font('ENCR10B.TTF', 16)
 
     dog = Dog()
     bg = Background()
-    huddle = [Huddle(i + 1) for i in range(20)]
+    t = [Tunnel(i + 1) for i in range(20)]
 
     game_world.add_object(bg, 0)
     game_world.add_object(dog, 2)
-    game_world.add_objects(huddle, 1)
+    game_world.add_objects(t, 1)
 
-    game_world.add_collision_pair('dog:huddle', dog, None)
-    for i in huddle:
-        game_world.add_collision_pair('dog:huddle', None, i)
+    game_world.add_collision_pair('dog:tunnel', dog, None)
+    for i in t:
+        game_world.add_collision_pair('dog:tunnel', None, i)
 
-    for i in huddle:
-        game_world.add_collision_pair('huddle:huddle', i, i)
+    for i in t:
+        game_world.add_collision_pair('tunnel:tunnel', i, i)
 
     dog.set_background(bg)
 
     while True:
         flag = False
-        if game_world.handle_init_collisions('huddle:huddle'): flag = True
+        if game_world.handle_init_collisions('tunnel:tunnel'): flag = True
         if flag: break
 
-    pass
 
 def finish():
     game_world.clear()
@@ -94,8 +84,9 @@ def update():
     else:
         timer = get_time() - start_time
     game_world.update()
-    game_world.handle_collisions('dog:huddle')
-    game_world.handle_obs_collisions('dog:huddle')
+    game_world.handle_collisions('dog:tunnel')
+    if dog.state_machine.cur_state == Run:
+        game_world.handle_obs_collisions('dog:tunnel')
 
     if obstacle_count == 0:
         game_framework.push_mode(clear_mode)

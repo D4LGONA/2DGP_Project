@@ -52,6 +52,8 @@ def fail(e):
 def collision_with_AF(e):
     return e[0] == 'COLL_AF'
 
+def collision_with_TN(e):
+    return e[0] == 'COLL_TN'
 
 # time_out = lambda e : e[0] == 'TIME_OUT'
 
@@ -60,7 +62,6 @@ class Idle:
 
     @staticmethod
     def enter(c, e):
-        print("idle enter")
         c.face_dir = 'idle'
 
     @staticmethod
@@ -69,7 +70,6 @@ class Idle:
 
     @staticmethod
     def do(c):
-        # print("idle 실행 중")
         c.shadowX = c.x
         c.shadowY = c.y
         c.frameX = (c.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 2
@@ -132,7 +132,6 @@ class Jump:
 
     @staticmethod
     def do(c):
-        print("jump do")
         c.frameX = (c.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 2
         c.x += c.dirX * RUN_SPEED_PPS * game_framework.frame_time
         c.y += c.dirY * RUN_SPEED_PPS * game_framework.frame_time
@@ -161,7 +160,6 @@ class Jump:
 class A_frame:
     @staticmethod
     def enter(c, e):
-        print("들어옴")
         c.Fail = False
         c.is_up = True
         c.frameY = state[c.face_dir]
@@ -169,7 +167,6 @@ class A_frame:
 
     @staticmethod
     def exit(c, e):
-        print("나감")
         pass
 
     @staticmethod
@@ -180,6 +177,7 @@ class A_frame:
             else:
                 c.face_dir = 'run_ld'
             c.Fail = True
+            c.shadowY -= 100
 
         if c.is_up and not c.Fail: # 올라가는중
             if c.face_dir == 'run_ru' and c.x > c.col_obj.x:
@@ -197,9 +195,9 @@ class A_frame:
                 dest = c.col_obj.x + 40
             else:
                 dest = c.col_obj.x - 40
-            if c.x > dest:
+            if (c.col_obj.state == 'left' and c.x > dest) or (c.col_obj.state == 'right' and c.x < dest):
                 game_framework.get_mode()[-1].success_count += 1
-                game_framework.get_mode()[-1].a_frame_count -= 1
+                game_framework.get_mode()[-1].obstacle_count -= 1
                 c.dirY = 0
                 if c.face_dir == 'run_rd':
                     c.face_dir = 'run_r'
@@ -210,9 +208,9 @@ class A_frame:
                 c.state_machine.handle_event(('TIME_OUT', 0))
         else: # Fail
             game_world.move_depth(c.col_obj, 1)
-            if c.y < c.col_obj.y - 40: # 이케 해도 되나
+            if c.y < c.col_obj.y - 100: # 이케 해도 되나
                 game_framework.get_mode()[-1].fail_count += 1
-                game_framework.get_mode()[-1].a_frame_count -= 1
+                game_framework.get_mode()[-1].obstacle_count -= 1
                 c.state_machine.handle_event(('FAIL', 0))
             else:
                 c.dirY = -1
@@ -226,8 +224,6 @@ class A_frame:
         c.shadowX = c.x
         c.shadowY = c.y
 
-        pass
-
     @staticmethod
     def draw(c):
         c.frameY = state[c.face_dir]
@@ -236,6 +232,70 @@ class A_frame:
         c.image.clip_draw(int(c.frameX) * 32, int(c.frameY) * 32, 32, 32, sx, sy, 64, 64)
         pass
 
+class Tunnel:
+
+    @staticmethod
+    def enter(c, e):
+        c.Fail = False
+        if c.col_obj.state == 'right_straight' or c.col_obj.state == 'left_straight':
+            c.is_curve = False
+        else:
+            c.is_curve = True
+        c.turn = False
+        c.frameY = state[c.face_dir]
+        pass
+
+    @staticmethod
+    def exit(c, e):
+        pass
+
+    @staticmethod
+    def do(c):
+        if c.is_curve:
+            if c.col_obj.state == "left_curve":
+                if c.turn and c.x < c.col_obj.x - 128:
+                    game_framework.get_mode()[-1].success_count += 1
+                    game_framework.get_mode()[-1].obstacle_count -= 1
+                    c.state_machine.handle_event(('TIME_OUT', 0))
+                if not c.turn and c.x > c.col_obj.x + 64:
+                    c.dirX *= -1
+                    c.turn = True
+                    c.face_dir = 'run_l'
+            else:
+                if c.turn and c.x > c.col_obj.x + 128:
+                    game_framework.get_mode()[-1].success_count += 1
+                    game_framework.get_mode()[-1].obstacle_count -= 1
+                    c.state_machine.handle_event(('TIME_OUT', 0))
+                if not c.turn and c.x < c.col_obj.x - 64:
+                    c.dirX *= -1
+                    c.turn = True
+                    c.face_dir = 'run_r'
+        else:
+            if c.col_obj.state == "left_straight":
+                if c.x > c.col_obj.x + 128:
+                    game_framework.get_mode()[-1].success_count += 1
+                    game_framework.get_mode()[-1].obstacle_count -= 1
+                    c.state_machine.handle_event(('TIME_OUT', 0))
+            else:
+                if c.x < c.col_obj.x - 128:
+                    game_framework.get_mode()[-1].success_count += 1
+                    game_framework.get_mode()[-1].obstacle_count -= 1
+                    c.state_machine.handle_event(('TIME_OUT', 0))
+
+        c.frameX = (c.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 2
+        c.x += c.dirX * RUN_SPEED_PPS * game_framework.frame_time
+        c.y += c.dirY * RUN_SPEED_PPS * game_framework.frame_time
+
+        c.shadowX = c.x
+        c.shadowY = c.y
+
+    @staticmethod
+    def draw(c):
+        c.frameY = state[c.face_dir]
+        sx, sy = c.x - c.bg.window_left, c.y - c.bg.window_bottom
+        c.shadow.draw(c.shadowX - c.bg.window_left, c.shadowY - c.bg.window_bottom - 20, 64, 20)
+        c.image.clip_draw(int(c.frameX) * 32, int(c.frameY) * 32, 32, 32, sx, sy + c.jump, 64, 64)
+        pass
 
 class Stop:
 
@@ -267,11 +327,12 @@ class StateMachine:
         self.dog = dog
         self.cur_state = Idle
         self.transitions = {
-            Idle: {Lclick: Run, space_down: Jump, collision_with_AF: A_frame},
-            Run: {Lclick: Run, ctrl_down: Stop, space_down: Jump, collision_with_AF: A_frame},
+            Idle: {Lclick: Run, space_down: Jump, collision_with_AF: A_frame, collision_with_TN: Tunnel},
+            Run: {Lclick: Run, ctrl_down: Stop, space_down: Jump, collision_with_AF: A_frame, collision_with_TN: Tunnel},
             Stop: {ctrl_up: Idle},
             Jump: {time_out: Run},
-            A_frame: {time_out: Run, fail: Idle}
+            A_frame: {time_out: Run, fail: Idle},
+            Tunnel: {time_out: Run, fail: Run}
         }
 
     def start(self):
@@ -363,15 +424,46 @@ class Dog: # 강아지 캐릭터
 
     def setDest(self, x, y): # 목적지와 방향 정하는 것
         # x, y가 300, 300에서 얼마나 떨어져 있는지 확인 하기 x - 300, y - 300 얘를 정규화 x,y랑 300300
-        print(self.x, self.y)
         dx = x + self.bg.window_left
         dy = y + self.bg.window_bottom
         self.dirX = (dx-self.x) / dist((dx, dy), (self.x, self.y))
         self.dirY = (dy-self.y) / dist((dx, dy), (self.x, self.y))
 
     def get_bb(self):
-        return (self.x - self.bg.window_left - 28, self.y - self.bg.window_bottom - 28
-                , self.x - self.bg.window_left + 28, self.y - self.bg.window_bottom + 28)
+        return (self.x - self.bg.window_left - 28, self.y - self.bg.window_bottom - 28 + self.jump
+                , self.x - self.bg.window_left + 28, self.y - self.bg.window_bottom + 28 + self.jump)
+
+    def handle_obs_collision(self, group, other, where):
+        if where == 'left' or where == 'right':
+            self.dirX *= -1.0
+            if self.face_dir == 'run_r':
+                self.face_dir = 'run_l'
+            elif self.face_dir == 'run_l':
+                self.face_dir = 'run_r'
+            elif self.face_dir == 'run_ru':
+                self.face_dir = 'run_lu'
+            elif self.face_dir == 'run_lu':
+                self.face_dir = 'run_ru'
+            elif self.face_dir == 'run_rd':
+                self.face_dir = 'run_ld'
+            elif self.face_dir == 'run_ld':
+                self.face_dir = 'run_rd'
+
+        elif where == 'top' or where == 'bottom':
+            self.dirY *= -1.0
+            if self.face_dir == 'run_ru':
+                self.face_dir = 'run_rd'
+            elif self.face_dir == 'run_lu':
+                self.face_dir = 'run_ld'
+            elif self.face_dir == 'run_rd':
+                self.face_dir = 'run_ru'
+            elif self.face_dir == 'run_ld':
+                self.face_dir = 'run_lu'
+            elif self.face_dir == 'run_u':
+                self.face_dir = 'run_d'
+            elif self.face_dir == 'run_d':
+                self.face_dir = 'run_u'
+
 
     def handle_collision(self, group, other):
         if group == 'dog:huddle':
@@ -383,13 +475,12 @@ class Dog: # 강아지 캐릭터
                 else:
                     huddle_mode.fail_count += 1
                     other.iscoll = True
+
         elif group == 'dog:a_frame':
             if not other.ischecked:
                 other.ischecked = True
                 self.col_obj = other
-                print(other.state)
                 if other.state == 'right':
-                    print("너가 문제냐?")
                     self.face_dir = "run_lu"
                     self.dirX = -1.0 / 2
                     self.dirY = math.sqrt(3) / 2
@@ -398,10 +489,28 @@ class Dog: # 강아지 캐릭터
                     self.dirX = 1.0 / 2
                     self.dirY = math.sqrt(3) / 2
                 self.state_machine.handle_event(('COLL_AF', 0))
-            pass
+
         elif group == 'dog:seesaw':
             pass
         elif group == 'dog:tunnel':
-            pass
+            if not other.ischecked:
+                other.ischecked = True
+                self.col_obj = other
+                if other.state == 'right_curve' or other.state == 'right_straight':
+                    self.face_dir = 'run_l'
+                    self.dirX = -1.0
+                    if other.state == 'right_curve':
+                        self.dirY = 0.1
+                    else:
+                        self.dirY = 0
+                else:
+                    self.face_dir = 'run_r'
+                    self.dirX = 1.0
+                    if other.state == 'left_curve':
+                        self.dirY = 0.1
+                    else:
+                        self.dirY = 0
+                self.state_machine.handle_event(('COLL_TN', 0))
+
         elif group == 'dog:d':
             pass

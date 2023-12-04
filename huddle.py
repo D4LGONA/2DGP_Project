@@ -36,13 +36,16 @@ class Huddle:
         self.state_value = randint(0, 3)
         self.state = [i for i, v in state.items() if v == self.state_value][0]
         self.iscoll = False
-        self.dx, self.dy = 0, 0
+        self.dx, self.dy = self.x, self.y
 
     def draw(self):
         self.frameY = state[self.state]
         Huddle.image.clip_draw(int(self.frameX) * 64, self.frameY * 64, 64, 64,
                                self.dx, self.dy, 128, 128)
         draw_rectangle(*self.get_bb())
+
+        draw_rectangle(*self.get_obs_bb()[0])
+        draw_rectangle(*self.get_obs_bb()[1])
         self.font.draw(self.dx, self.dy+30, f'{self.number}')
 
 
@@ -74,12 +77,16 @@ class Huddle:
         else:
             return self.dx - 32, self.dy - 50, self.dx + 32, self.dy - 10
 
+    def get_init_bb(self):
+        return self.dx - 80, self.dy - 80, self.dx + 80, self.dy + 80
+
+    def get_obs_bb(self):
+        return [[self.dx - 60, self.dy - 50, self.dx - 40, self.dy - 40], [self.dx + 40, self.dy - 50, self.dx + 60, self.dy - 40]]
+
     def handle_collision(self, group, other):
         if group == 'huddle:huddle':
             if self is not other:
-                print(self.number, self.x, self.y)
                 self.x, self.y = randint(300, 3300), randint(300, 3300)
-                self.dx, self.dy = self.x - game_framework.get_mode()[-1].bg.window_left, self.y - \
-                                   game_framework.get_mode()[-1].bg.window_bottom
+                self.dx, self.dy = self.x, self.y
         pass
 

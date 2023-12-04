@@ -4,6 +4,7 @@ import game_world
 import select_mode
 import huddle_mode
 import a_frame_mode
+import tunnel_mode
 
 class Selectmode2:
     def __init__(self):
@@ -29,7 +30,7 @@ class Selectmode2:
         elif self.get_huddle()[0] < x < self.get_huddle()[2] and self.get_huddle()[1] < y < self.get_huddle()[3]:
             game_framework.change_mode(huddle_mode)
         elif self.get_tunnel()[0] < x < self.get_tunnel()[2] and self.get_tunnel()[1] < y < self.get_tunnel()[3]:
-            pass
+            game_framework.change_mode(tunnel_mode)
         elif self.get_seesaw()[0] < x < self.get_seesaw()[2] and self.get_seesaw()[1] < y < self.get_seesaw()[3]:
             pass
         elif self.get_aframe()[0] < x < self.get_aframe()[2] and self.get_aframe()[1] < y < self.get_aframe()[3]:
