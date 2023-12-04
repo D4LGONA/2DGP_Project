@@ -4,9 +4,9 @@ import game_framework
 import game_world
 import select_mode_2
 from background import Background
-from dog import Dog, Idle, Jump
+from dog import Dog, Idle
 import map_mode
-from huddle import Huddle
+from weavepoles import Weavepoles
 import clear_mode
 
 success_count = 0
@@ -45,7 +45,7 @@ def handle_events():
 def init():
     global dog
     global bg
-    global huddle
+    global wp
     global font
     global success_count, fail_count, timer, start_time, timerStart, obstacle_count
 
@@ -60,24 +60,30 @@ def init():
 
     dog = Dog()
     bg = Background()
-    huddle = [Huddle(i + 1) for i in range(20)]
+    wp = []
+    for i in range(20):
+        wp.append(Weavepoles(i + 1))
+        wp.append(Weavepoles((i + 1), wp[i * 2].x + 32, wp[i * 2].y + 32, wp[i * 2]))
+        wp[i * 2].son = wp[i*2 + 1]
 
     game_world.add_object(bg, 0)
     game_world.add_object(dog, 2)
-    game_world.add_objects(huddle, 1)
+    game_world.add_objects(wp, 1)
 
-    game_world.add_collision_pair('dog:huddle', dog, None)
-    for i in huddle:
-        game_world.add_collision_pair('dog:huddle', None, i)
 
-    for i in huddle:
-        game_world.add_collision_pair('huddle:huddle', i, i)
+
+    game_world.add_collision_pair('dog:weavepoles', dog, None)
+    for i in wp:
+        game_world.add_collision_pair('dog:weavepoles', None, i)
+
+    for i in wp:
+        game_world.add_collision_pair('weavepoles:weavepoles', i, i)
 
     dog.set_background(bg)
 
     while True:
         flag = False
-        if game_world.handle_init_collisions('huddle:huddle'): flag = True
+        if game_world.handle_init_collisions('weavepoles:weavepoles'): flag = True
         if flag: break
 
     pass
@@ -94,9 +100,7 @@ def update():
     else:
         timer = get_time() - start_time
     game_world.update()
-    game_world.handle_collisions('dog:huddle')
-    if dog.state_machine.cur_state is not Jump:
-        game_world.handle_obs_collisions('dog:huddle')
+    game_world.handle_collisions('dog:weavepoles')
 
     if obstacle_count == 0:
         game_framework.push_mode(clear_mode)

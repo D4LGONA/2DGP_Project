@@ -20,13 +20,21 @@ def add_objects(ol, depth = 0):
 def update():
     for layer in objects:
         for o in layer:
-            o.update()
+            if type(o) == list:
+                o[0].update()
+                o[1].update()
+            else:
+                o.update()
 
 
 def render():
     for layer in objects:
         for o in layer:
-            o.draw()
+            if type(o) == list:
+                o[0].draw()
+                o[1].draw()
+            else:
+                o.draw()
 
 # fill here
 def add_collision_pair(group, a = None, b = None): # a와 b 사이에 충돌 검사가 필요하다
@@ -67,11 +75,17 @@ def clear():
         layer.clear()
 
 
-
-# fill here
 def collide(a, b):
-    la, ba, ra, ta = a.get_bb()
-    lb, bb, rb, tb = b.get_bb()
+
+    if type(a) == list:
+        la, ba, ra, ta = a[0].get_bb()
+    else:
+        la, ba, ra, ta = a.get_bb()
+
+    if type(b) == list:
+        lb, bb, rb, tb = b[0].get_bb()
+    else:
+        lb, bb, rb, tb = b.get_bb()
 
     if la > rb: return False
     if ra < lb: return False
@@ -82,14 +96,21 @@ def collide(a, b):
 
 def init_collide(a, b):
     if a == b: return False
-    la, ba, ra, ta = a.get_init_bb()
-    lb, bb, rb, tb = b.get_init_bb()
+
+    if type(a) == list:
+        la, ba, ra, ta = a[0].get_init_bb()
+    else :
+        la, ba, ra, ta = a.get_init_bb()
+
+    if type(b) == list:
+        lb, bb, rb, tb = b[0].get_init_bb()
+    else:
+        lb, bb, rb, tb = b.get_init_bb()
 
     if la > rb: return False
     if ra < lb: return False
     if ta < bb: return False
     if ba > tb: return False
-    print(a, b)
     return True
 
 def obs_collide(a, b):
@@ -124,15 +145,22 @@ def handle_init_collisions(group):
         for b in collision_pairs[group][1]:
             if a is not b and init_collide(a, b):
                 flag = False
-                a.handle_collision(group, b)
+                if type(a) == list and type(b) == list:
+                    a[0].handle_collision(group, b[0])
+                else:
+                    a.handle_collision(group, b)
     return flag
 
 def handle_collisions(group):
     for a in collision_pairs[group][0]:
         for b in collision_pairs[group][1]:
             if collide(a, b): # a와 b에게 충돌 처리 알아서 하라고 알려줌
-                a.handle_collision(group, b)
-                b.handle_collision(group, a)
+                if type(b) == list:
+                    a.handle_collision(group, b[0])
+                    b[0].handle_collision(group, a)
+                else:
+                    a.handle_collision(group, b)
+                    b.handle_collision(group, a)
     return None
 
 def handle_obs_collisions(group):

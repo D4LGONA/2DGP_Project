@@ -5,6 +5,8 @@ import select_mode
 import huddle_mode
 import a_frame_mode
 import tunnel_mode
+import weavepoles_mode
+
 
 class Selectmode2:
     def __init__(self):
@@ -36,7 +38,7 @@ class Selectmode2:
         elif self.get_aframe()[0] < x < self.get_aframe()[2] and self.get_aframe()[1] < y < self.get_aframe()[3]:
             game_framework.change_mode(a_frame_mode)
         elif self.get_weavepoles()[0] < x < self.get_weavepoles()[2] and self.get_weavepoles()[1] < y < self.get_weavepoles()[3]:
-            pass
+            game_framework.change_mode(weavepoles_mode)
         elif self.get_all()[0] < x < self.get_all()[2] and self.get_all()[1] < y < self.get_all()[3]:
             pass
 

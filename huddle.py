@@ -11,7 +11,6 @@ import game_world
 ** todo list **
 순서대로 안넘으면 fail count 올리기
 허들 넘는거 성공한 카운트 어떻게 잴지 다시 생각 해보기
-여기 수정해야 함
 '''
 
 state = {"right2": 0, "left2": 1, "right1": 2, "left1": 3}

@@ -55,7 +55,11 @@ def collision_with_AF(e):
 def collision_with_TN(e):
     return e[0] == 'COLL_TN'
 
-# time_out = lambda e : e[0] == 'TIME_OUT'
+def collision_with_WP(e):
+    return e[0] == 'COLL_WP'
+
+def Lshift_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_LSHIFT
 
 # 상태 목록: idle, run, stop, jump
 class Idle:
@@ -297,6 +301,53 @@ class Tunnel:
         c.image.clip_draw(int(c.frameX) * 32, int(c.frameY) * 32, 32, 32, sx, sy + c.jump, 64, 64)
         pass
 
+class Weavepole:
+    @staticmethod
+    def enter(c, e):
+        c.frameY = state[c.face_dir]
+        c.start_time = get_time()
+        c.col_obj.iscoll = True
+        pass
+
+    @staticmethod
+    def exit(c, e):
+        c.col_obj.iscoll = False
+        pass
+
+    @staticmethod
+    def do(c):
+        if get_time() - c.start_time > 0.5:
+            c.dirX = 0
+            c.state_machine.handle_event(('FAIL', 0))
+            game_framework.get_mode()[-1].fail_count += 1
+            game_framework.get_mode()[-1].obstacle_count -= 1
+
+        if c.dirX > 0:
+            if c.x > c.col_obj.x + 150:
+                c.state_machine.handle_event(('TIME_OUT', 0))
+                game_framework.get_mode()[-1].success_count += 1
+                game_framework.get_mode()[-1].obstacle_count -= 1
+        else:
+            if c.x < c.col_obj.x - 150:
+                c.state_machine.handle_event(('TIME_OUT', 0))
+                game_framework.get_mode()[-1].success_count += 1
+                game_framework.get_mode()[-1].obstacle_count -= 1
+
+        c.frameX = (c.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 2
+        c.x += c.dirX * RUN_SPEED_PPS * game_framework.frame_time / 2
+        c.y += c.dirY * RUN_SPEED_PPS * game_framework.frame_time / 2
+
+        c.shadowX = c.x
+        c.shadowY = c.y
+
+    @staticmethod
+    def draw(c):
+        c.frameY = state[c.face_dir]
+        sx, sy = c.x - c.bg.window_left, c.y - c.bg.window_bottom
+        c.shadow.draw(c.shadowX - c.bg.window_left, c.shadowY - c.bg.window_bottom - 20, 64, 20)
+        c.image.clip_draw(int(c.frameX) * 32, int(c.frameY) * 32, 32, 32, sx, sy + c.jump, 64, 64)
+        pass
+
 class Stop:
 
     @staticmethod
@@ -327,12 +378,13 @@ class StateMachine:
         self.dog = dog
         self.cur_state = Idle
         self.transitions = {
-            Idle: {Lclick: Run, space_down: Jump, collision_with_AF: A_frame, collision_with_TN: Tunnel},
-            Run: {Lclick: Run, ctrl_down: Stop, space_down: Jump, collision_with_AF: A_frame, collision_with_TN: Tunnel},
+            Idle: {Lclick: Run, space_down: Jump, collision_with_AF: A_frame, collision_with_TN: Tunnel, collision_with_WP: Weavepole},
+            Run: {Lclick: Run, ctrl_down: Stop, space_down: Jump, collision_with_AF: A_frame, collision_with_TN: Tunnel, collision_with_WP: Weavepole},
             Stop: {ctrl_up: Idle},
             Jump: {time_out: Run},
             A_frame: {time_out: Run, fail: Idle},
-            Tunnel: {time_out: Run, fail: Run}
+            Tunnel: {time_out: Run, fail: Run},
+            Weavepole: {time_out: Run, Lshift_down: Weavepole, fail: Idle}
         }
 
     def start(self):
@@ -512,5 +564,19 @@ class Dog: # 강아지 캐릭터
                         self.dirY = 0
                 self.state_machine.handle_event(('COLL_TN', 0))
 
-        elif group == 'dog:d':
+        elif group == 'dog:weavepoles':
+            if not other.ischecked:
+                other.ischecked = True
+                other.iscoll = True
+                self.col_obj = other
+                self.y = other.y - 40.0
+                if self.face_dir == 'run_r' or self.face_dir == 'run_ru' or self.face_dir == 'run_rd':
+                    self.face_dir = 'run_r'
+                    self.dirX = 1.0
+                    self.dirY = 0
+                elif self.face_dir == 'run_l' or self.face_dir == 'run_lu'or self.face_dir == 'run_ld':
+                    self.face_dir = 'run_l'
+                    self.dirX = -1.0
+                    self.dirY = 0
+                self.state_machine.handle_event(('COLL_WP', 0))
             pass

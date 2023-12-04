@@ -6,6 +6,7 @@ from dog import Idle
 class Map:
     def __init__(self):
         self.image = load_image('resources/bg.png')
+        self.font = load_font('ENCR10B.TTF')
         self.cx = 300
         self.cy = 300
 
@@ -13,7 +14,17 @@ class Map:
         self.image.draw(300, 300, 600, 600)
         game_framework.get_mode()[-2].dog.image.clip_draw(0, 12 * 32, 32, 32,
             int(game_framework.get_mode()[-2].dog.x / 6), int(game_framework.get_mode()[-2].dog.y / 6),
-            32/6.0, 32/6.0)
+            128/6.0, 128/6.0)
+        for o in game_world.objects[1]:
+            if type(o) == list:
+                self.font.draw(o[0].x / 6, o[0].y / 6, f'{o[0].number}', (0, 0, 0))
+            else:
+                self.font.draw(o.x/6, o.y/6, f'{o[0].number}', (0,0,0))
+        for o in game_world.objects[3]:
+            if type(o) == list:
+                self.font.draw(o[0].x / 6, o[0].y / 6, f'{o[0].number}', (0, 0, 0))
+            else:
+                self.font.draw(o.x / 6, o.y / 6, f'{o[0].number}', (0, 0, 0))
 
     def update(self):
         pass
