@@ -1,4 +1,4 @@
-objects = [[] for _ in range(4)]
+objects = [[] for _ in range(5)]
 
 # fill here
 collision_pairs = {} # {'boy:ball' : [[boy], [balls]]}
@@ -59,7 +59,6 @@ def remove_object(o):
 
 
 def clear():
-    print(objects[0])
     clear_collision_object()
     for layer in objects:
         for o in layer:

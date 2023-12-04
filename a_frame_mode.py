@@ -2,7 +2,6 @@ import random
 from pico2d import *
 import game_framework
 import game_world
-import map
 from background import Background
 from dog import Dog, Idle
 import map_mode
@@ -73,7 +72,7 @@ def finish():
 
 
 def update():
-    global centerX, centerY, timer
+    global timer
     if not timerStart:
         timer = 0.0
     else:

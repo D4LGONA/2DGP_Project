@@ -33,7 +33,7 @@ class Selectmode2:
         elif self.get_seesaw()[0] < x < self.get_seesaw()[2] and self.get_seesaw()[1] < y < self.get_seesaw()[3]:
             pass
         elif self.get_aframe()[0] < x < self.get_aframe()[2] and self.get_aframe()[1] < y < self.get_aframe()[3]:
-            pass
+            game_framework.change_mode(a_frame_mode)
         elif self.get_weavepoles()[0] < x < self.get_weavepoles()[2] and self.get_weavepoles()[1] < y < self.get_weavepoles()[3]:
             pass
         elif self.get_all()[0] < x < self.get_all()[2] and self.get_all()[1] < y < self.get_all()[3]:

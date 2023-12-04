@@ -2,6 +2,7 @@ from pico2d import *
 import game_framework
 import game_world
 from math import *
+import random
 
 import huddle_mode
 
@@ -9,8 +10,6 @@ G = 2
 
 '''
  ** Todo list **
- Jump 상태일 때 맵 보기로 넘어가면 제자리로 돌아오지 않는 문제
- -> 상태를 확인하고 map mode에서 update를 돌릴지 말지 설정하는 방법이 없을까?
  Jump 가속도 수정하기
 
 '''
@@ -19,8 +18,8 @@ state = {"stop_left": 0, "stop_right": 1, "stop_up" : 2, "stop_down": 3,
          "run_ld": 4, "run_ru": 5, "run_l": 6, "run_r": 7,
          "run_lu": 8, "run_rd": 9, "run_u": 10, "run_d": 11, "idle": 12}
 
-# 강아지 속도 10km/h로 갈기고 여기서 36003600이니까 720미터 정도로 할까 가로 세로
-PIXEL_PER_METER = (3600 / 72)  # 10 pixel 30 cm
+# 강아지 속도 20km/h로 갈기고 여기서 36003600이니까 720미터 정도로 할까 가로 세로
+PIXEL_PER_METER = (3600 / 72)  # 1미터 50픽셀?
 RUN_SPEED_KMPH = 20.0  # Km / Hour
 RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
 RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
@@ -46,6 +45,13 @@ def ctrl_up(e):
 
 def time_out(e):
     return e[0] == 'TIME_OUT'
+
+def fail(e):
+    return e[0] == 'FAIL'
+
+def collision_with_AF(e):
+    return e[0] == 'COLL_AF'
+
 
 # time_out = lambda e : e[0] == 'TIME_OUT'
 
@@ -152,6 +158,78 @@ class Jump:
         c.image.clip_draw(int(c.frameX) * 32, int(c.frameY) * 32, 32, 32, sx, sy + c.jump, 64, 64)
         pass
 
+class A_frame:
+    @staticmethod
+    def enter(c, e):
+        print("들어옴")
+        c.Fail = False
+        c.is_up = True
+        c.frameY = state[c.face_dir]
+        pass
+
+    @staticmethod
+    def exit(c, e):
+        print("나감")
+        pass
+
+    @staticmethod
+    def do(c):
+        if not c.Fail and random.randint(0, 100) == 1:
+            if c.face_dir == 'run_ru':
+                c.face_dir = 'run_rd'
+            else:
+                c.face_dir = 'run_ld'
+            c.Fail = True
+
+        if c.is_up and not c.Fail: # 올라가는중
+            if c.face_dir == 'run_ru' and c.x > c.col_obj.x:
+                c.face_dir = 'run_rd'
+                c.is_up = False
+                c.dirY *= -1
+                game_world.move_depth(c.col_obj, 3)
+            elif c.face_dir == 'run_lu' and c.x < c.col_obj.x:
+                c.is_up = False
+                c.face_dir = 'run_ld'
+                c.dirY *= -1
+                game_world.move_depth(c.col_obj, 3)
+        elif not c.is_up and not c.Fail: # 내려가는중
+            print("내려가는중")
+            if c.x > c.col_obj.x + 40:
+                c.dirY = 0
+                if c.face_dir == 'run_rd':
+                    c.face_dir = 'run_r'
+                    c.dirX = 1
+                else:
+                    c.face_dir = 'run_l'
+                    c.dirX = -1
+                c.state_machine.handle_event(('TIME_OUT', 0))
+        else: # Fail
+            game_world.move_depth(c.col_obj, 1)
+            print("헐..")
+            if c.y < c.col_obj.y - 40: # 이케 해도 되나
+                c.state_machine.handle_event(('FAIL', 0))
+            else:
+                c.dirY = -1
+                c.dirX = 0
+                c.face_dir = 'run_d'
+
+        c.frameX = (c.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 2
+        c.x += c.dirX * RUN_SPEED_PPS * game_framework.frame_time
+        c.y += c.dirY * RUN_SPEED_PPS * game_framework.frame_time
+        c.shadowX = c.x
+        c.shadowY = c.y
+
+        pass
+
+    @staticmethod
+    def draw(c):
+        c.frameY = state[c.face_dir]
+        sx, sy = c.x - c.bg.window_left, c.y - c.bg.window_bottom
+        c.shadow.draw(c.shadowX - c.bg.window_left, c.shadowY - c.bg.window_bottom - 20, 64, 20)
+        c.image.clip_draw(int(c.frameX) * 32, int(c.frameY) * 32, 32, 32, sx, sy, 64, 64)
+        pass
+
+
 class Stop:
 
     @staticmethod
@@ -166,7 +244,7 @@ class Stop:
 
     @staticmethod
     def do(c):
-        #c.frameX = (c.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 2
+        c.frameX = (c.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 2
         pass
 
     @staticmethod
@@ -182,10 +260,11 @@ class StateMachine:
         self.dog = dog
         self.cur_state = Idle
         self.transitions = {
-            Idle: {Lclick: Run, space_down: Jump},
-            Run: {Lclick: Run, ctrl_down: Stop, space_down: Jump},
+            Idle: {Lclick: Run, space_down: Jump, collision_with_AF: A_frame},
+            Run: {Lclick: Run, ctrl_down: Stop, space_down: Jump, collision_with_AF: A_frame},
             Stop: {ctrl_up: Idle},
-            Jump: {time_out: Run}
+            Jump: {time_out: Run},
+            A_frame: {time_out: Run, fail: Idle}
         }
 
     def start(self):
@@ -284,20 +363,32 @@ class Dog: # 강아지 캐릭터
         self.dirY = (dy-self.y) / dist((dx, dy), (self.x, self.y))
 
     def get_bb(self):
-        return (self.x - self.bg.window_left - 32, self.y - self.bg.window_bottom - 32
-                , self.x - self.bg.window_left + 32, self.y - self.bg.window_bottom + 32)
+        return (self.x - self.bg.window_left - 28, self.y - self.bg.window_bottom - 28
+                , self.x - self.bg.window_left + 28, self.y - self.bg.window_bottom + 28)
 
     def handle_collision(self, group, other):
         if group == 'dog:huddle':
             if not other.ischecked:
                 other.ischecked = True
-                huddle_mode.huddle_count -= 1
+                huddle_mode.obstacle_count -= 1
                 if self.isjump:
                     huddle_mode.success_count += 1
                 else:
                     huddle_mode.fail_count += 1
                     other.iscoll = True
         elif group == 'dog:a_frame':
+            if not other.ischecked:
+                other.iscoll = True
+                self.col_obj = other
+                if other.state == 'right':
+                    self.face_dir = "run_lu"
+                    self.dirX = -1.0 / 2
+                    self.dirY = math.sqrt(3) / 2
+                else:
+                    self.face_dir = "run_ru"
+                    self.dirX = 1.0 / 2
+                    self.dirY = math.sqrt(3) / 2
+                self.state_machine.handle_event(('COLL_AF', 0))
             pass
         elif group == 'dog:seesaw':
             pass

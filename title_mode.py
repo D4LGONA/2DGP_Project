@@ -3,7 +3,6 @@ import game_framework
 import game_world
 import huddle_mode
 import select_mode
-from map import Map
 
 class Title:
     def __init__(self, s):
