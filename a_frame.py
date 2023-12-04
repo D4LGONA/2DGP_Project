@@ -53,7 +53,7 @@ class Aframe:
 
     def get_bb(self):
         if self.state == 'right':
-            return self.dx + 16, self.dy - 16, self.dx - 64, self.dy - 64
+            return self.dx + 16, self.dy - 16, self.dx + 64, self.dy - 64
         else:
             return self.dx - 64, self.dy - 16, self.dx - 16, self.dy - 64
 

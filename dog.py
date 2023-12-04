@@ -193,8 +193,13 @@ class A_frame:
                 c.dirY *= -1
                 game_world.move_depth(c.col_obj, 3)
         elif not c.is_up and not c.Fail: # 내려가는중
-            print("내려가는중")
-            if c.x > c.col_obj.x + 40:
+            if c.col_obj.state == 'left':
+                dest = c.col_obj.x + 40
+            else:
+                dest = c.col_obj.x - 40
+            if c.x > dest:
+                game_framework.get_mode()[-1].success_count += 1
+                game_framework.get_mode()[-1].a_frame_count -= 1
                 c.dirY = 0
                 if c.face_dir == 'run_rd':
                     c.face_dir = 'run_r'
@@ -205,13 +210,15 @@ class A_frame:
                 c.state_machine.handle_event(('TIME_OUT', 0))
         else: # Fail
             game_world.move_depth(c.col_obj, 1)
-            print("헐..")
             if c.y < c.col_obj.y - 40: # 이케 해도 되나
+                game_framework.get_mode()[-1].fail_count += 1
+                game_framework.get_mode()[-1].a_frame_count -= 1
                 c.state_machine.handle_event(('FAIL', 0))
             else:
                 c.dirY = -1
                 c.dirX = 0
                 c.face_dir = 'run_d'
+
 
         c.frameX = (c.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 2
         c.x += c.dirX * RUN_SPEED_PPS * game_framework.frame_time
@@ -378,9 +385,11 @@ class Dog: # 강아지 캐릭터
                     other.iscoll = True
         elif group == 'dog:a_frame':
             if not other.ischecked:
-                other.iscoll = True
+                other.ischecked = True
                 self.col_obj = other
+                print(other.state)
                 if other.state == 'right':
+                    print("너가 문제냐?")
                     self.face_dir = "run_lu"
                     self.dirX = -1.0 / 2
                     self.dirY = math.sqrt(3) / 2

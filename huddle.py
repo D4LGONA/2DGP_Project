@@ -81,6 +81,5 @@ class Huddle:
                 self.x, self.y = randint(300, 3300), randint(300, 3300)
                 self.dx, self.dy = self.x - game_framework.get_mode()[-1].bg.window_left, self.y - \
                                    game_framework.get_mode()[-1].bg.window_bottom
-                print("위치 변환됨!")
         pass
 
