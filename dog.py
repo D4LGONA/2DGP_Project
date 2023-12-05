@@ -8,11 +8,6 @@ import huddle_mode
 
 G = 2
 
-'''
- ** Todo list **
- Jump 가속도 수정하기
-
-'''
 
 state = {"stop_left": 0, "stop_right": 1, "stop_up" : 2, "stop_down": 3,
          "run_ld": 4, "run_ru": 5, "run_l": 6, "run_r": 7,
@@ -128,6 +123,7 @@ class Jump:
 
     @staticmethod
     def enter(c, e):
+        c.jp.play(1)
         c.frameX = 0
         c.jumptime = get_time()
         c.isjump = True
@@ -206,6 +202,7 @@ class A_frame:
             else:
                 dest = c.col_obj.x - 40
             if (c.col_obj.state == 'left' and c.x > dest) or (c.col_obj.state == 'right' and c.x < dest):
+                c.sc.play(1)
                 game_framework.get_mode()[-1].success_count += 1
                 game_framework.get_mode()[-1].obstacle_count -= 1
                 c.dirY = 0
@@ -221,6 +218,7 @@ class A_frame:
             if c.y < c.col_obj.y - 100: # 이케 해도 되나
                 game_framework.get_mode()[-1].fail_count += 1
                 game_framework.get_mode()[-1].obstacle_count -= 1
+                c.fl.play(1)
                 c.state_machine.handle_event(('FAIL', 0))
             else:
                 c.dirY = -1
@@ -265,6 +263,7 @@ class Tunnel:
             if c.col_obj.state == "left_curve":
 
                 if c.turn and c.x < c.col_obj.x - 128:
+                    c.sc.play(1)
                     game_framework.get_mode()[-1].success_count += 1
                     game_framework.get_mode()[-1].obstacle_count -= 1
                     c.state_machine.handle_event(('TIME_OUT', 0))
@@ -274,6 +273,7 @@ class Tunnel:
                     c.face_dir = 'run_l'
             else:
                 if c.turn and c.x > c.col_obj.x + 128:
+                    c.sc.play(1)
                     game_framework.get_mode()[-1].success_count += 1
                     game_framework.get_mode()[-1].obstacle_count -= 1
                     c.state_machine.handle_event(('TIME_OUT', 0))
@@ -284,11 +284,13 @@ class Tunnel:
         else:
             if c.col_obj.state == "left_straight":
                 if c.x > c.col_obj.x + 128:
+                    c.sc.play(1)
                     game_framework.get_mode()[-1].success_count += 1
                     game_framework.get_mode()[-1].obstacle_count -= 1
                     c.state_machine.handle_event(('TIME_OUT', 0))
             else:
                 if c.x < c.col_obj.x - 128:
+                    c.sc.play(1)
                     game_framework.get_mode()[-1].success_count += 1
                     game_framework.get_mode()[-1].obstacle_count -= 1
                     c.state_machine.handle_event(('TIME_OUT', 0))
@@ -325,6 +327,7 @@ class Weavepole:
     def do(c):
         if get_time() - c.start_time > 0.5:
             c.dirX = 0
+            c.fl.play(1)
             c.state_machine.handle_event(('FAIL', 0))
             game_framework.get_mode()[-1].fail_count += 1
             game_framework.get_mode()[-1].obstacle_count -= 1
@@ -332,11 +335,13 @@ class Weavepole:
         if c.dirX > 0:
             if c.x > c.col_obj.x + 150:
                 c.state_machine.handle_event(('TIME_OUT', 0))
+                c.sc.play(1)
                 game_framework.get_mode()[-1].success_count += 1
                 game_framework.get_mode()[-1].obstacle_count -= 1
         else:
             if c.x < c.col_obj.x - 150:
                 c.state_machine.handle_event(('TIME_OUT', 0))
+                c.sc.play(1)
                 game_framework.get_mode()[-1].success_count += 1
                 game_framework.get_mode()[-1].obstacle_count -= 1
 
@@ -375,6 +380,7 @@ class Seesaw:
         if c.col_obj.state == 'right':
 
             if c.x < c.col_obj.x - 64:
+                c.fl.play(1)
                 c.state_machine.handle_event(('FAIL', 0))
                 game_framework.get_mode()[-1].fail_count += 1
                 game_framework.get_mode()[-1].obstacle_count -= 1
@@ -390,17 +396,20 @@ class Seesaw:
 
                 if c.col_obj.frameX == 2:
                     c.state_machine.handle_event(('TIME_OUT', 0))
+                    c.sc.play(1)
                     game_framework.get_mode()[-1].success_count += 1
                     game_framework.get_mode()[-1].obstacle_count -= 1
 
             else:
                 if c.dirX == 0 and c.dirY == 0:
+                    c.fl.play(1)
                     c.state_machine.handle_event(('FAIL', 0))
                     game_framework.get_mode()[-1].fail_count += 1
                     game_framework.get_mode()[-1].obstacle_count -= 1
 
         else:
             if c.x > c.col_obj.x + 64:
+                c.fl.play(1)
                 c.state_machine.handle_event(('FAIL', 0))
                 game_framework.get_mode()[-1].fail_count += 1
                 game_framework.get_mode()[-1].obstacle_count -= 1
@@ -417,10 +426,12 @@ class Seesaw:
 
                 if c.col_obj.frameX == 2:
                     c.state_machine.handle_event(('TIME_OUT', 0))
+                    c.sc.play(1)
                     game_framework.get_mode()[-1].success_count += 1
                     game_framework.get_mode()[-1].obstacle_count -= 1
             else:
                 if c.dirX == 0 and c.dirY == 0:
+                    c.fl.play(1)
                     c.state_machine.handle_event(('FAIL', 0))
                     game_framework.get_mode()[-1].fail_count += 1
                     game_framework.get_mode()[-1].obstacle_count -= 1
@@ -519,6 +530,12 @@ class Dog: # 강아지 캐릭터
         self.shadow = load_image('resources/shadow.png')
         self.jump = 0.0
         self.current_obs = 1
+        self.sc = load_wav('resources/success.wav')
+        self.sc.set_volume(30)
+        self.fl = load_wav('resources/fail.wav')
+        self.fl.set_volume(30)
+        self.jp = load_wav('resources/jump.wav')
+        self.jp.set_volume(30)
 
     def update(self):
         self.state_machine.update()
@@ -618,6 +635,7 @@ class Dog: # 강아지 캐릭터
     def handle_collision(self, group, other):
 
         if other.number != self.current_obs and not other.ischecked:
+            self.fl.play(1)
             game_framework.get_mode()[-1].fail_count += 1
             game_framework.get_mode()[-1].obstacle_count -= 1
             other.ischecked = True
@@ -631,8 +649,10 @@ class Dog: # 강아지 캐릭터
                 game_framework.get_mode()[-1].obstacle_count -= 1
                 if self.isjump:
                     game_framework.get_mode()[-1].success_count += 1
+                    self.sc.play(1)
                 else:
                     game_framework.get_mode()[-1].fail_count += 1
+                    self.fl.play(1)
                     other.iscoll = True
 
         elif group == 'dog:a_frame':

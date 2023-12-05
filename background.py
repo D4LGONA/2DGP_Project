@@ -1,16 +1,20 @@
+import pico2d
 from pico2d import *
-from math import *
-import huddle_mode as play_mode
-import server
 import game_framework
 
 class Background:
     def __init__(self):
+        self.bgm = pico2d.load_music('resources/스노우브라더스 BGM - World1.mp3')
+        self.bgm.set_volume(30)
+        self.bgm.repeat_play()
+
         self.image = load_image('resources/bg.png')
         self.cw = 600
         self.ch = 600
         self.w = self.image.w
         self.h = self.image.h
+
+
 
     def draw(self):
         self.image.clip_draw_to_origin(self.window_left, self.window_bottom, self.cw, self.ch, 0, 0)

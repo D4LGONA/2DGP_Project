@@ -3,11 +3,17 @@ import game_framework
 import game_world
 import huddle_mode
 import select_mode
+import server
+
 
 class Title:
     def __init__(self, s):
         self.image = load_image(s)
         self.x, self.y = 300, 300
+        self.title_bgm = pico2d.load_music('resources/ghost_duet.mp3')
+        self.title_bgm.set_volume(30)
+        self.title_bgm.repeat_play()
+
 
     def draw(self):
         self.image.draw(self.x, self.y, 600, 600)
