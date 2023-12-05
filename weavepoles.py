@@ -14,7 +14,7 @@ FRAMES_PER_ACTION = 4
 class Weavepoles:
     image = None
     font = None
-    def __init__(self, num, x = randint(300, 3300),y = randint(300, 3300), parent = None):
+    def __init__(self, num,x = randint(300, 3300), y = randint(300, 3300),parent = None):
         if Weavepoles.image == None:
             Weavepoles.image = load_image('resources/weavepoles.png')
         if Weavepoles.font == None:
@@ -32,9 +32,8 @@ class Weavepoles:
     def draw(self):
         Weavepoles.image.clip_draw(int(self.frameX) * 64, 0, 64, 64,
                                self.dx, self.dy, 256, 128)
-        draw_rectangle(*self.get_bb())
-
-        Weavepoles.font.draw(self.dx, self.dy+30, f'{self.number}')
+        if self.parent == None:
+            Weavepoles.font.draw(self.dx, self.dy+100, f'{self.number}')
 
 
     def update(self):

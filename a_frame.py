@@ -11,7 +11,7 @@ state = {"right": 0, "left": 1}
 class Aframe:
     image = None
     font = None
-    def __init__(self, num):
+    def __init__(self, num, x = randint(300, 3300), y = randint(300, 3300), s = list(state.keys())[randint(0, 1)]):
         if Aframe.image == None:
             Aframe.image = load_image('resources/Aframe.png')
         if Aframe.font == None:
@@ -20,9 +20,8 @@ class Aframe:
         self.ischecked = False
         self.number = num
         self.frameX, self.frameY = 0, 0
-        self.x, self.y = randint(300, 3300), randint(300, 3300)
-        self.state_value = randint(0, 1)
-        self.state = [i for i, v in state.items() if v == self.state_value][0]
+        self.x, self.y = x, y
+        self.state = s
         self.iscoll = False
         self.dx, self.dy = self.x, self.y
         self.selected = False
@@ -31,9 +30,6 @@ class Aframe:
         self.frameY = state[self.state]
         Aframe.image.clip_draw(int(self.frameX) * 32, self.frameY * 32, 32, 32,
                                self.dx, self.dy, 128, 128)
-        draw_rectangle(*self.get_bb())
-        draw_rectangle(*self.get_init_bb())
-        draw_rectangle(*self.get_obs_bb()[0])
         self.font.draw(self.dx, self.dy+30, f'{self.number}')
 
     def update(self):

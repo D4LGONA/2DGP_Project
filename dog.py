@@ -46,6 +46,9 @@ def ctrl_up(e):
 def time_out(e):
     return e[0] == 'TIME_OUT'
 
+def set_time(e):
+    return e[0] == 'TIME_SET'
+
 def fail(e):
     return e[0] == 'FAIL'
 
@@ -57,6 +60,9 @@ def collision_with_TN(e):
 
 def collision_with_WP(e):
     return e[0] == 'COLL_WP'
+
+def collision_with_SS(e):
+    return e[0] == 'COLL_SS'
 
 def Lshift_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_LSHIFT
@@ -257,6 +263,7 @@ class Tunnel:
     def do(c):
         if c.is_curve:
             if c.col_obj.state == "left_curve":
+
                 if c.turn and c.x < c.col_obj.x - 128:
                     game_framework.get_mode()[-1].success_count += 1
                     game_framework.get_mode()[-1].obstacle_count -= 1
@@ -348,6 +355,95 @@ class Weavepole:
         c.image.clip_draw(int(c.frameX) * 32, int(c.frameY) * 32, 32, 32, sx, sy + c.jump, 64, 64)
         pass
 
+class Seesaw:
+    @staticmethod
+    def enter(c, e):
+        if e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_LCTRL:
+            c.dirX, c.dirY = 0, 0
+        c.frameY = state[c.face_dir]
+        c.col_obj.start_time = get_time()
+        c.col_obj.iscoll = True
+        pass
+
+    @staticmethod
+    def exit(c, e):
+        c.col_obj.iscoll = False
+        pass
+
+    @staticmethod
+    def do(c):
+        if c.col_obj.state == 'right':
+
+            if c.x < c.col_obj.x - 64:
+                c.state_machine.handle_event(('FAIL', 0))
+                game_framework.get_mode()[-1].fail_count += 1
+                game_framework.get_mode()[-1].obstacle_count -= 1
+
+            if c.x < c.col_obj.x + 10: # 시간재서 넘어가는거
+                if get_time() - c.col_obj.start_time > 0.5:
+                    c.col_obj.frameX += 1
+                    c.col_obj.start_time = get_time()
+                    c.face_dir = 'run_l'
+                    c.state_machine.handle_event(('SET_TIME', 0))
+                    c.y -= 15
+                    c.shadowY = c.y
+
+                if c.col_obj.frameX == 2:
+                    c.state_machine.handle_event(('TIME_OUT', 0))
+                    game_framework.get_mode()[-1].success_count += 1
+                    game_framework.get_mode()[-1].obstacle_count -= 1
+
+            else:
+                if c.dirX == 0 and c.dirY == 0:
+                    c.state_machine.handle_event(('FAIL', 0))
+                    game_framework.get_mode()[-1].fail_count += 1
+                    game_framework.get_mode()[-1].obstacle_count -= 1
+
+        else:
+            if c.x > c.col_obj.x + 64:
+                c.state_machine.handle_event(('FAIL', 0))
+                game_framework.get_mode()[-1].fail_count += 1
+                game_framework.get_mode()[-1].obstacle_count -= 1
+
+            if c.x > c.col_obj.x - 10: # 시간재서 넘어가는거
+                if get_time() - c.col_obj.start_time > 0.5:
+                    c.col_obj.start_time = get_time()
+                    c.face_dir = 'run_r'
+                    c.state_machine.handle_event(('SET_TIME', 0))
+                    c.col_obj.frameX += 1
+                    c.y -= 15
+                    c.shadowY = c.y
+
+
+                if c.col_obj.frameX == 2:
+                    c.state_machine.handle_event(('TIME_OUT', 0))
+                    game_framework.get_mode()[-1].success_count += 1
+                    game_framework.get_mode()[-1].obstacle_count -= 1
+            else:
+                if c.dirX == 0 and c.dirY == 0:
+                    c.state_machine.handle_event(('FAIL', 0))
+                    game_framework.get_mode()[-1].fail_count += 1
+                    game_framework.get_mode()[-1].obstacle_count -= 1
+
+
+
+
+        c.frameX = (c.frameX + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 2
+        c.x += c.dirX * RUN_SPEED_PPS * game_framework.frame_time
+        c.y += c.dirY * RUN_SPEED_PPS * game_framework.frame_time
+
+        c.shadowX = c.x
+        c.shadowY = c.y
+
+
+    @staticmethod
+    def draw(c):
+        c.frameY = state[c.face_dir]
+        sx, sy = c.x - c.bg.window_left, c.y - c.bg.window_bottom
+        c.shadow.draw(c.shadowX - c.bg.window_left, c.shadowY - c.bg.window_bottom - 20, 64, 20)
+        c.image.clip_draw(int(c.frameX) * 32, int(c.frameY) * 32, 32, 32, sx, sy + c.jump, 64, 64)
+        pass
+
 class Stop:
 
     @staticmethod
@@ -378,13 +474,14 @@ class StateMachine:
         self.dog = dog
         self.cur_state = Idle
         self.transitions = {
-            Idle: {Lclick: Run, space_down: Jump, collision_with_AF: A_frame, collision_with_TN: Tunnel, collision_with_WP: Weavepole},
-            Run: {Lclick: Run, ctrl_down: Stop, space_down: Jump, collision_with_AF: A_frame, collision_with_TN: Tunnel, collision_with_WP: Weavepole},
+            Idle: {Lclick: Run, space_down: Jump, collision_with_AF: A_frame, collision_with_TN: Tunnel, collision_with_WP: Weavepole, collision_with_SS: Seesaw},
+            Run: {Lclick: Run, ctrl_down: Stop, space_down: Jump, collision_with_AF: A_frame, collision_with_TN: Tunnel, collision_with_WP: Weavepole, collision_with_SS: Seesaw},
             Stop: {ctrl_up: Idle},
             Jump: {time_out: Run},
             A_frame: {time_out: Run, fail: Idle},
             Tunnel: {time_out: Run, fail: Run},
-            Weavepole: {time_out: Run, Lshift_down: Weavepole, fail: Idle}
+            Weavepole: {time_out: Run, Lshift_down: Weavepole, fail: Idle},
+            Seesaw: {ctrl_down: Seesaw, set_time: Seesaw, fail: Run, time_out: Run}
         }
 
     def start(self):
@@ -421,9 +518,11 @@ class Dog: # 강아지 캐릭터
         self.shadowX, self.shadowY = 300, 300
         self.shadow = load_image('resources/shadow.png')
         self.jump = 0.0
+        self.current_obs = 1
 
     def update(self):
         self.state_machine.update()
+
 
         self.x = clamp(32.0, self.x, self.bg.w - 32.0)
         self.y = clamp(32.0, self.y, self.bg.h - 32.0)
@@ -433,7 +532,6 @@ class Dog: # 강아지 캐릭터
 
     def draw(self):
         self.state_machine.draw()
-        draw_rectangle(*self.get_bb())
 
 
     def set_background(self, bg):
@@ -518,19 +616,29 @@ class Dog: # 강아지 캐릭터
 
 
     def handle_collision(self, group, other):
+
+        if other.number != self.current_obs and not other.ischecked:
+            game_framework.get_mode()[-1].fail_count += 1
+            game_framework.get_mode()[-1].obstacle_count -= 1
+            other.ischecked = True
+            return
+
+
         if group == 'dog:huddle':
             if not other.ischecked:
+                self.current_obs += 1
                 other.ischecked = True
-                huddle_mode.obstacle_count -= 1
+                game_framework.get_mode()[-1].obstacle_count -= 1
                 if self.isjump:
-                    huddle_mode.success_count += 1
+                    game_framework.get_mode()[-1].success_count += 1
                 else:
-                    huddle_mode.fail_count += 1
+                    game_framework.get_mode()[-1].fail_count += 1
                     other.iscoll = True
 
         elif group == 'dog:a_frame':
             if not other.ischecked:
                 other.ischecked = True
+                self.current_obs += 1
                 self.col_obj = other
                 if other.state == 'right':
                     self.face_dir = "run_lu"
@@ -543,10 +651,26 @@ class Dog: # 강아지 캐릭터
                 self.state_machine.handle_event(('COLL_AF', 0))
 
         elif group == 'dog:seesaw':
-            pass
+            if not other.ischecked:
+                other.ischecked = True
+                self.current_obs += 1
+                other.iscoll = True
+                self.col_obj = other
+                self.y = other.y - 40.0
+                if other.state == 'right':
+                    self.face_dir = "run_lu"
+                    self.dirX = -1/sqrt(2)
+                    self.dirY = 1/sqrt(2)
+                else:
+                    self.face_dir = "run_ru"
+                    self.dirX = 1/sqrt(2)
+                    self.dirY = 1/sqrt(2)
+                self.state_machine.handle_event(('COLL_SS', 0))
+
         elif group == 'dog:tunnel':
             if not other.ischecked:
                 other.ischecked = True
+                self.current_obs += 1
                 self.col_obj = other
                 if other.state == 'right_curve' or other.state == 'right_straight':
                     self.face_dir = 'run_l'
@@ -566,6 +690,7 @@ class Dog: # 강아지 캐릭터
 
         elif group == 'dog:weavepoles':
             if not other.ischecked:
+                self.current_obs += 1
                 other.ischecked = True
                 other.iscoll = True
                 self.col_obj = other
@@ -579,4 +704,4 @@ class Dog: # 강아지 캐릭터
                     self.dirX = -1.0
                     self.dirY = 0
                 self.state_machine.handle_event(('COLL_WP', 0))
-            pass
+

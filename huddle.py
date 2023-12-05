@@ -22,7 +22,7 @@ FRAMES_PER_ACTION = 4
 class Huddle:
     image = None
     font = None
-    def __init__(self, num):
+    def __init__(self, num, x = randint(300, 3300), y = randint(300, 3300), s = list(state.keys())[randint(0, 3)]):
         if Huddle.image == None:
             Huddle.image = load_image('resources/huddle.png')
         if Huddle.font == None:
@@ -31,9 +31,8 @@ class Huddle:
         self.ischecked = False
         self.number = num
         self.frameX, self.frameY = 0, 3
-        self.x, self.y = randint(300, 3300), randint(300, 3300)
-        self.state_value = randint(0, 3)
-        self.state = [i for i, v in state.items() if v == self.state_value][0]
+        self.x, self.y = x, y
+        self.state = s
         self.iscoll = False
         self.dx, self.dy = self.x, self.y
 
@@ -43,8 +42,6 @@ class Huddle:
                                self.dx, self.dy, 128, 128)
         draw_rectangle(*self.get_bb())
 
-        draw_rectangle(*self.get_obs_bb()[0])
-        draw_rectangle(*self.get_obs_bb()[1])
         self.font.draw(self.dx, self.dy+30, f'{self.number}')
 
 
@@ -58,6 +55,7 @@ class Huddle:
         # Todo: 여기 방향에 따라 depth 이동하는거 수정하기
         if not game_framework.get_mode()[-1].dog.isjump:
             self.set_depth()
+
         pass
 
     def set_depth(self):

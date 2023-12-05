@@ -4,9 +4,9 @@ import game_framework
 import game_world
 import select_mode_2
 from background import Background
-from dog import Dog, Idle, Run
+from dog import Dog, Idle, Jump
 import map_mode
-from tunnel import Tunnel
+from seesaw import Seesaw
 import clear_mode
 
 success_count = 0
@@ -27,7 +27,7 @@ def handle_events():
             if event.key == SDLK_ESCAPE:
                 game_framework.change_mode(select_mode_2)
             elif event.key == SDLK_m:
-                dog.state_machine.cur_state = Idle
+                dog.state_machine.handle_event(('TIME_OUT', 0))
                 game_framework.push_mode(map_mode)
             elif event.key == SDLK_c:
                 success_count = 20
@@ -45,33 +45,42 @@ def handle_events():
 def init():
     global dog
     global bg
-    global t
-
+    global ss
     global font
+    global success_count, fail_count, timer, start_time, timerStart, obstacle_count
+
+    success_count = 0
+    fail_count = 0
+    timer = 0.0
+    start_time = 0.0
+    timerStart = False
+    obstacle_count = 20
+
     font = load_font('ENCR10B.TTF', 16)
 
     dog = Dog()
     bg = Background()
-    t = [Tunnel(i + 1) for i in range(20)]
+    ss = [Seesaw(i + 1) for i in range(20)]
 
     game_world.add_object(bg, 0)
     game_world.add_object(dog, 2)
-    game_world.add_objects(t, 1)
+    game_world.add_objects(ss, 1)
 
-    game_world.add_collision_pair('dog:tunnel', dog, None)
-    for i in t:
-        game_world.add_collision_pair('dog:tunnel', None, i)
+    game_world.add_collision_pair('dog:seesaw', dog, None)
+    for i in ss:
+        game_world.add_collision_pair('dog:seesaw', None, i)
 
-    for i in t:
-        game_world.add_collision_pair('tunnel:tunnel', i, i)
+    for i in ss:
+        game_world.add_collision_pair('seesaw:seesaw', i, i)
 
     dog.set_background(bg)
 
     while True:
         flag = False
-        if game_world.handle_init_collisions('tunnel:tunnel'): flag = True
+        if game_world.handle_init_collisions('seesaw:seesaw'): flag = True
         if flag: break
 
+    pass
 
 def finish():
     game_world.clear()
@@ -85,9 +94,9 @@ def update():
     else:
         timer = get_time() - start_time
     game_world.update()
-    game_world.handle_collisions('dog:tunnel')
-    if dog.state_machine.cur_state == Run:
-        game_world.handle_obs_collisions('dog:tunnel')
+    game_world.handle_collisions('dog:seesaw')
+    if dog.state_machine.cur_state not in [Jump, Seesaw]:
+        game_world.handle_obs_collisions('dog:seesaw')
 
     if obstacle_count == 0:
         game_framework.push_mode(clear_mode)

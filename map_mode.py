@@ -16,15 +16,11 @@ class Map:
             int(game_framework.get_mode()[-2].dog.x / 6), int(game_framework.get_mode()[-2].dog.y / 6),
             128/6.0, 128/6.0)
         for o in game_world.objects[1]:
-            if type(o) == list:
-                self.font.draw(o[0].x / 6, o[0].y / 6, f'{o[0].number}', (0, 0, 0))
-            else:
-                self.font.draw(o.x/6, o.y/6, f'{o[0].number}', (0,0,0))
+            if not hasattr(o, 'parent') or o.parent == None:
+                self.font.draw(o.x/6, o.y/6, f'{o.number}', (0,0,0))
         for o in game_world.objects[3]:
-            if type(o) == list:
-                self.font.draw(o[0].x / 6, o[0].y / 6, f'{o[0].number}', (0, 0, 0))
-            else:
-                self.font.draw(o.x / 6, o.y / 6, f'{o[0].number}', (0, 0, 0))
+            if not hasattr(o, 'parent') or o.parent == None:
+                self.font.draw(o.x / 6, o.y / 6, f'{o.number}', (0, 0, 0))
 
     def update(self):
         pass

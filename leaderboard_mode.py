@@ -2,11 +2,14 @@ from pico2d import *
 import game_framework
 import game_world
 import select_mode
+import server
+
 
 # Todo: 파일 입출력 해서 데이터 리스트에 넣기
 
 class Ranking:
     def __init__(self):
+        server.get_rank()
         self.image = load_image('resources/ranking.png')
         self.cx = 300
         self.cy = 300
@@ -14,6 +17,10 @@ class Ranking:
 
     def draw(self):
         self.image.draw(300, 300, 600, 600)
+        c = 1
+        for i in server.rank_list:
+            self.font.draw(100, 560 - (60 * c), f'Time: {i[0]:0.2f}, Success: {i[1]}, Fail: {i[2]}')
+            c += 1
 
     def update(self):
         pass

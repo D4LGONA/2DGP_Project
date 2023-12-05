@@ -114,6 +114,8 @@ def init_collide(a, b):
     return True
 
 def obs_collide(a, b):
+    if b.get_obs_bb() == None:
+        return (False, None)
     la, ba, ra, ta = a.get_bb()
     coll_list_b = b.get_obs_bb()
 
@@ -151,22 +153,34 @@ def handle_init_collisions(group):
                     a.handle_collision(group, b)
     return flag
 
-def handle_collisions(group):
-    for a in collision_pairs[group][0]:
-        for b in collision_pairs[group][1]:
-            if collide(a, b): # a와 b에게 충돌 처리 알아서 하라고 알려줌
-                if type(b) == list:
-                    a.handle_collision(group, b[0])
-                    b[0].handle_collision(group, a)
-                else:
+def handle_collisions(group = None):
+    if group == None:
+        for g, pairs in collision_pairs.items():
+            for a in pairs[0]:
+                for b in pairs[1]:
+                    if collide(a, b):
+                        a.handle_collision(g, b)
+                        b.handle_collision(g, a)
+    else:
+        for a in collision_pairs[group][0]:
+            for b in collision_pairs[group][1]:
+                if collide(a, b): # a와 b에게 충돌 처리 알아서 하라고 알려줌
                     a.handle_collision(group, b)
                     b.handle_collision(group, a)
     return None
 
-def handle_obs_collisions(group):
-    for a in collision_pairs[group][0]:
-        for b in collision_pairs[group][1]:
-            q = obs_collide(a, b)
-            if q[0]: # a와 b에게 충돌 처리 알아서 하라고 알려줌
-                a.handle_obs_collision(group, b, q[1])
-    return None
+def handle_obs_collisions(group = None):
+    if group == None:
+        for g, pairs in collision_pairs.items():
+            for a in pairs[0]:
+                for b in pairs[1]:
+                    q = obs_collide(a, b)
+                    if q[0]:
+                        a.handle_obs_collision(g, b, q[1])
+    else:
+        for a in collision_pairs[group][0]:
+            for b in collision_pairs[group][1]:
+                q = obs_collide(a, b)
+                if q[0]: # a와 b에게 충돌 처리 알아서 하라고 알려줌
+                    a.handle_obs_collision(group, b, q[1])
+        return None

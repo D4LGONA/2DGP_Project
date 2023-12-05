@@ -11,7 +11,7 @@ state = {"right_straight": 0, "right_curve": 1, "left_straight": 2, "left_curve"
 class Tunnel:
     image = None
     font = None
-    def __init__(self, num):
+    def __init__(self, num, x = randint(300, 3300), y = randint(300, 3300), s = None):
         if Tunnel.image == None:
             Tunnel.image = load_image('resources/Tunnel.png')
         if Tunnel.font == None:
@@ -20,9 +20,11 @@ class Tunnel:
         self.ischecked = False
         self.number = num
         self.frameX, self.frameY = 0, 0
-        self.x, self.y = randint(300, 3300), randint(300, 3300)
-        self.state_value = randint(0, 3)
-        self.state = [i for i, v in state.items() if v == self.state_value][0]
+        self.x, self.y = x, y
+        if s == None:
+            self.state_value = randint(0, 3)
+            self.state = [i for i, v in state.items() if v == self.state_value][0]
+        else : self.state = s
         self.iscoll = False
         self.dx, self.dy = self.x, self.y
         self.selected = False
@@ -31,7 +33,6 @@ class Tunnel:
         self.frameY = state[self.state]
         Tunnel.image.clip_draw(int(self.frameX) * 64, self.frameY * 32, 64, 32,
                                self.dx, self.dy, 256, 128)
-        draw_rectangle(*self.get_bb())
         self.font.draw(self.dx, self.dy+70, f'{self.number}')
 
     def update(self):

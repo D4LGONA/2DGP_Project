@@ -1,8 +1,10 @@
 from pico2d import *
 import game_framework
 import game_world
+import leaderboard_mode
 import title_mode
 import select_mode_2
+import play_mode
 
 class Selectmode:
     def __init__(self):
@@ -22,10 +24,12 @@ class Selectmode:
     def check_click(self, x, y):
         if self.get_start()[0] < x < self.get_start()[2] and self.get_start()[1] < y < self.get_start()[3]:
             game_framework.change_mode(play_mode)
+            play_mode.is_recode = True
         elif self.get_practice()[0] < x < self.get_practice()[2] and self.get_practice()[1] < y < self.get_practice()[3]:
             game_framework.change_mode(select_mode_2)
         elif self.get_ranking()[0] < x < self.get_ranking()[2] and self.get_ranking()[1] < y < self.get_ranking()[3]:
-            game_framework.change_mode(ranking_mode)
+            print("Dd")
+            game_framework.change_mode(leaderboard_mode)
         elif self.get_back()[0] < x < self.get_back()[2] and self.get_back()[1] < y < self.get_back()[3]:
             game_framework.change_mode(title_mode)
 
@@ -41,7 +45,7 @@ class Selectmode:
         return 0, 550, 100, 600
 
     def get_ranking(self):
-        return 160, 180, 440, 120
+        return 160, 120, 440, 180
 
 def handle_events():
     events = get_events()
